@@ -1,5 +1,6 @@
 package com.jgonmor.store.controller;
 
+import com.jgonmor.store.dto.ClientDto;
 import com.jgonmor.store.model.Client;
 import com.jgonmor.store.service.client.IClientService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,13 +17,13 @@ public class ClientController {
 
     @GetMapping("/clients")
     public ResponseEntity<?> getAllClients() {
-        List<Client> clients = clientService.getAllClients();
+        List<ClientDto> clients = clientService.getAllClients();
         return ResponseEntity.ok(clients);
     }
 
     @GetMapping("/clients/{id}")
     public ResponseEntity<?> getClientById(@PathVariable Long id) {
-        Client client = clientService.getClientById(id);
+        ClientDto client = clientService.getClientById(id);
         if (client == null) {
             return ResponseEntity.status(404)
                                  .body("Client not found");
@@ -31,14 +32,14 @@ public class ClientController {
     }
 
     @PostMapping("/clients/new")
-    public ResponseEntity<?> saveClient(@RequestBody Client client) {
-        Client newClient = clientService.saveClient(client);
+    public ResponseEntity<?> saveClient(@RequestBody ClientDto client) {
+        ClientDto newClient = clientService.saveClient(client);
         return ResponseEntity.ok(newClient);
     }
 
     @PutMapping("/clients/update")
-    public ResponseEntity<?> updateClient(@RequestBody Client client) {
-        Client updatedClient = clientService.updateClient(client);
+    public ResponseEntity<?> updateClient(@RequestBody ClientDto client) {
+        ClientDto updatedClient = clientService.updateClient(client);
         return ResponseEntity.ok(updatedClient);
     }
 
