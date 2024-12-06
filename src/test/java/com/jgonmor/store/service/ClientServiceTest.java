@@ -1,5 +1,6 @@
 package com.jgonmor.store.service;
 
+import com.jgonmor.store.dto.ClientDto;
 import com.jgonmor.store.model.Client;
 import com.jgonmor.store.repository.IClientRepository;
 import com.jgonmor.store.service.client.ClientService;
@@ -78,15 +79,16 @@ public class ClientServiceTest {
         // Arrange
         Client client = new Client(null, "client 1", "Last 1", "12345678A");
         Client savedClient = new Client(1L, "client 1", "Last 1", "12345678A");
+        ClientDto clientDto = clientService.toDto(client);
 
         when(clientRepository.save(client)).thenReturn(savedClient);
 
         // Act
-        Client result = clientService.saveClient(client);
+        ClientDto result = clientService.saveClient(clientDto);
 
         // Assert
         assertNotNull(result);
-        assertEquals(savedClient, result);
+        assertEquals(savedClient.getName(), result.getName());
         verify(clientRepository, times(1)).save(client);
     }
 
@@ -123,12 +125,16 @@ public class ClientServiceTest {
     void testUpdateClient() {
         // Arrange
         Client client = new Client(1L, "client 1", "Last 1", "12345678A");
-        Client updatedClient = new Client(1L, "client updated", "Last 1", "12345678A");
+        ClientDto clientDto = new ClientDto(1L, "client 1", "Last 1", "12345678A");
+        Client updatedEntity = new Client(1L, "client updated", "Last 1", "12345678A");
+        ClientDto updatedClient = new ClientDto(1L, "client updated", "Last 1", "12345678A");
 
-        when(clientService.updateClient(client)).thenReturn(updatedClient);
+        when(clientRepository.findById(1L)).thenReturn(Optional.of(client));
+
+        when(clientRepository.save(any(Client.class))).thenReturn(updatedEntity);
 
         // Act
-        Client result = clientService.updateClient(client);
+        ClientDto result = clientService.updateClient(clientDto);
 
         // Assert
         assertNotNull(result);
