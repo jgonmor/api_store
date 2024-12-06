@@ -1,18 +1,18 @@
 package com.jgonmor.store.service.client;
 
-import com.jgonmor.store.model.Client;
+import com.jgonmor.store.dto.ClientDto;
 
 import java.util.List;
 
 public interface IClientService {
 
-    List<Client> getAllClients();
+    List<ClientDto> getAllClients();
 
-    Client getClientById(Long id);
+    ClientDto getClientById(Long id);
 
-    Client saveClient(Client client);
+    ClientDto saveClient(ClientDto client);
 
     Boolean deleteClient(Long id);
 
-    Client updateClient(Client client);
+    ClientDto updateClient(ClientDto client);
 }
