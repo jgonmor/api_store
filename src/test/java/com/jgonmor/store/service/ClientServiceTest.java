@@ -1,6 +1,7 @@
 package com.jgonmor.store.service;
 
 import com.jgonmor.store.dto.ClientDto;
+import com.jgonmor.store.exceptions.ResourceNotFoundException;
 import com.jgonmor.store.model.Client;
 import com.jgonmor.store.repository.IClientRepository;
 import com.jgonmor.store.service.client.ClientService;
@@ -65,12 +66,8 @@ public class ClientServiceTest {
     void testGetClientByIdNotFound() {
         // Arrange
         when(clientRepository.findById(1L)).thenReturn(Optional.empty());
-
-        // Act
-        var result = clientService.getClientById(1L);
-
-        // Assert
-        assertNull(result);
+        // Act & Assert
+        assertThrowsExactly(ResourceNotFoundException.class, () -> clientService.getClientById(1L));
         verify(clientRepository, times(1)).findById(1L);
     }
 
@@ -114,10 +111,8 @@ public class ClientServiceTest {
         when(clientRepository.findById(1L)).thenReturn(Optional.empty());
 
         // Act
-        Boolean result = clientService.deleteClient(1L);
 
-        // Assert
-        assertFalse(result);
+        assertThrowsExactly(ResourceNotFoundException.class, () -> clientService.deleteClient(1L));
         verify(clientRepository, times(0)).deleteById(1L);
     }
 

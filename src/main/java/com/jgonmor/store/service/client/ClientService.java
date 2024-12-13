@@ -23,7 +23,7 @@ public class ClientService implements IClientService{
             throw new EmptyTableException("There are no clients");
         }
 
-        return this.toDtoList(clientRepository.findAll());
+        return this.toDtoList(clients);
     }
 
     @Override
