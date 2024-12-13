@@ -2,6 +2,7 @@ package com.jgonmor.store.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.DynamicUpdate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.List;
 @AllArgsConstructor
 @EqualsAndHashCode
 @Entity
+@DynamicUpdate
 public class Client {
 
     @Id
@@ -33,14 +35,5 @@ public class Client {
         this.citizenId = citizenId;
     }
 
-    public void addSell(Sell sell) {
-        sells.add(sell);
-        sell.setClient(this);
-    }
-
-    public void removeSell(Sell sell) {
-        sells.remove(sell);
-        sell.setClient(null);
-    }
 
 }

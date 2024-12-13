@@ -2,6 +2,7 @@ package com.jgonmor.store.controller;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jgonmor.store.dto.ClientDto;
 import com.jgonmor.store.model.Client;
 import com.jgonmor.store.service.client.IClientService;
 import org.junit.jupiter.api.Test;
@@ -48,8 +49,8 @@ public class ClientControllerIntegrationTest {
     @Test
     void getAllClients_shouldReturnClients() throws Exception {
         // Arrange
-        Client client1 = new Client(1L, "client 1", "Last 1", "12345678A");
-        Client client2 = new Client(2L, "client 2", "Last 2", "87654321B");
+        ClientDto client1 = new ClientDto(1L, "client 1", "Last 1", "12345678A");
+        ClientDto client2 = new ClientDto(2L, "client 2", "Last 2", "87654321B");
         Mockito.when(clientService.getAllClients()).thenReturn(Arrays.asList(client1, client2));
 
         // Act & Assert
@@ -70,7 +71,7 @@ public class ClientControllerIntegrationTest {
 
     @Test
     public void testGetClientById_shouldReturnStatus200() throws Exception {
-        Client client = new Client(1L, "client 1", "Last 1", "12345678A");
+        ClientDto client = new ClientDto(1L, "client 1", "Last 1", "12345678A");
         Mockito.when(clientService.getClientById(1L)).thenReturn(client);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/clients/1")
@@ -82,7 +83,7 @@ public class ClientControllerIntegrationTest {
     @Test
     void getClientById_shouldReturnClient() throws Exception {
         // Arrange
-        Client client = new Client(1L, "client 1", "Last 1", "12345678A");
+        ClientDto client = new ClientDto(1L, "client 1", "Last 1", "12345678A");
         when(clientService.getClientById(1L)).thenReturn(client);
 
         // Act & Assert
@@ -109,8 +110,8 @@ public class ClientControllerIntegrationTest {
     void saveClient_shouldReturnSavedClient() throws Exception {
         // Arrange
         Client client = new Client(null, "client 1", "Last 1", "12345678A");
-        Client savedClient = new Client(1L, "client 1", "Last 1", "12345678A");
-        Mockito.when(clientService.saveClient(Mockito.any(Client.class))).thenReturn(savedClient);
+        ClientDto savedClient = new ClientDto(1L, "client 1", "Last 1", "12345678A");
+        when(clientService.saveClient(Mockito.any(ClientDto.class))).thenReturn(savedClient);
 
         // Act & Assert
         mockMvc.perform(post("/clients/new")
@@ -125,8 +126,8 @@ public class ClientControllerIntegrationTest {
     @Test
     void updateClient_shouldReturnUpdatedClient() throws Exception {
         // Arrange
-        Client client = new Client(1L, "client 1", "Last 1", "12345678A");
-        Mockito.when(clientService.updateClient(Mockito.any(Client.class))).thenReturn(client);
+        ClientDto client = new ClientDto(1L, "client 1", "Last 1", "12345678A");
+        Mockito.when(clientService.updateClient(Mockito.any(ClientDto.class))).thenReturn(client);
 
         // Act & Assert
         mockMvc.perform(put("/clients/update")

@@ -1,6 +1,8 @@
 package com.jgonmor.store.service.client;
 
 import com.jgonmor.store.dto.ClientDto;
+import com.jgonmor.store.exceptions.EmptyTableException;
+import com.jgonmor.store.exceptions.ResourceNotFoundException;
 import com.jgonmor.store.model.Client;
 import com.jgonmor.store.repository.IClientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ClientService implements IClientService{
@@ -17,15 +20,17 @@ public class ClientService implements IClientService{
 
     @Override
     public List<ClientDto> getAllClients() {
+        List<Client> clients = clientRepository.findAll();
+        if(clients.isEmpty()){
+            throw new EmptyTableException("There are no clients");
+        }
+
         return this.toDtoList(clientRepository.findAll());
     }
 
     @Override
     public ClientDto getClientById(Long id) {
-        Client client = clientRepository.findById(id).orElse(null);
-        if (client == null) {
-            return null;
-        }
+        Client client = this.existOrException(id);
         return this.toDto(client);
     }
 
@@ -39,9 +44,7 @@ public class ClientService implements IClientService{
     @Override
     public Boolean deleteClient(Long id) {
 
-        if(this.getClientById(id) == null){
-            return false;
-        }
+        this.existOrException(id);
 
         clientRepository.deleteById(id);
 
@@ -50,7 +53,13 @@ public class ClientService implements IClientService{
 
     @Override
     public ClientDto updateClient(ClientDto client) {
+        this.existOrException(client.getId());
+
         return this.saveClient(client);
+    }
+
+    private Client existOrException(Long id){
+        return clientRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Client not found"));
     }
 
     public ClientDto toDto(Client client) {
