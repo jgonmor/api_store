@@ -1,5 +1,6 @@
 package com.jgonmor.store.service;
 
+import com.jgonmor.store.exceptions.ResourceNotFoundException;
 import com.jgonmor.store.model.Product;
 import com.jgonmor.store.repository.IProductRepository;
 import com.jgonmor.store.service.product.ProductService;
@@ -66,10 +67,7 @@ public class ProductServiceTest {
         when(productRepository.findById(1L)).thenReturn(Optional.empty());
 
         // Act
-        var result = productService.getProductById(1L);
-
-        // Assert
-        assertNull(result);
+        assertThrows(ResourceNotFoundException.class, () -> productService.getProductById(1L));
         verify(productRepository, times(1)).findById(1L);
     }
 
@@ -112,10 +110,7 @@ public class ProductServiceTest {
         when(productRepository.findById(1L)).thenReturn(Optional.empty());
 
         // Act
-        Boolean result = productService.deleteProduct(1L);
-
-        // Assert
-        assertFalse(result);
+        assertThrows(ResourceNotFoundException.class, () -> productService.deleteProduct(1L));
         verify(productRepository, times(0)).deleteById(1L);
     }
 
@@ -125,6 +120,7 @@ public class ProductServiceTest {
         Product product = new Product(1L, "product 1", "Brand 1", 10.0, 5);
         Product updatedProduct = new Product(1L, "product 1 updated", "Brand 1 updated", 10.0, 5);
 
+        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
         when(productService.updateProduct(product)).thenReturn(updatedProduct);
 
         // Act
