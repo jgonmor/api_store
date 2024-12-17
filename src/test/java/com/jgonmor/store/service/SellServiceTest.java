@@ -1,5 +1,6 @@
 package com.jgonmor.store.service;
 
+import com.jgonmor.store.exceptions.ResourceNotFoundException;
 import com.jgonmor.store.model.Client;
 import com.jgonmor.store.model.Product;
 import com.jgonmor.store.model.Sell;
@@ -97,12 +98,15 @@ public class SellServiceTest {
         // Arrange
         when(sellRepository.findById(1L)).thenReturn(Optional.empty());
 
-        // Act
-        var result = sellService.getSellById(1L);
+        try {
+            sellService.getSellById(1L);
+        } catch (ResourceNotFoundException e) {
+            // Assert
+            assertEquals("Sell not found", e.getMessage());
+        } finally {
+            verify(sellRepository, times(1)).findById(1L);
+        }
 
-        // Assert
-        assertNull(result);
-        verify(sellRepository, times(1)).findById(1L);
     }
 
     @Test
@@ -139,7 +143,7 @@ public class SellServiceTest {
                 100d,
                 products,
                 defaultClient);
-        when(sellRepository.findById(id)).thenReturn(Optional.of(sell));
+        when(sellRepository.existsById(id)).thenReturn(true);
 
         // Act
         Boolean result = sellService.deleteSell(id);
@@ -147,20 +151,25 @@ public class SellServiceTest {
         // Assert
         assertTrue(result);
         verify(sellRepository, times(1)).deleteById(id);
-        verify(sellRepository, times(1)).findById(id);
+        verify(sellRepository, times(1)).existsById(id);
     }
 
     @Test
     void testDeleteSellNotFound() {
         // Arrange
-        when(sellRepository.findById(1L)).thenReturn(Optional.empty());
+        when(sellRepository.existsById(1L)).thenReturn(false);
 
         // Act
-        Boolean result = sellService.deleteSell(1L);
+        try {
+            sellService.deleteSell(1L);
+        } catch (ResourceNotFoundException e) {
+            // Assert
+            assertEquals("Sell not found", e.getMessage());
+            verify(sellRepository, times(0)).deleteById(1L);
+        } finally {
+            verify(sellRepository, times(1)).existsById(1L);
+        }
 
-        // Assert
-        assertFalse(result);
-        verify(sellRepository, times(0)).deleteById(1L);
     }
 
     @Test
@@ -170,14 +179,15 @@ public class SellServiceTest {
                 LocalDateTime.now(),
                 100d,
                 products,
-                defaultClient);;
+                defaultClient);
         Sell updatedSell = new Sell(1L,
                 LocalDateTime.now(),
                 200d,
                 products,
                 defaultClient);
 
-        when(sellService.updateSell(sell)).thenReturn(updatedSell);
+        when(sellRepository.existsById(1L)).thenReturn(true);
+        when(sellRepository.save(any(Sell.class))).thenReturn(updatedSell);
 
         // Act
         Sell result = sellService.updateSell(sell);
