@@ -1,5 +1,6 @@
 package com.jgonmor.store.controller;
 
+import com.jgonmor.store.exceptions.EmptyQueryException;
 import com.jgonmor.store.exceptions.EmptyTableException;
 
 import com.jgonmor.store.exceptions.ResourceNotFoundException;
@@ -18,6 +19,14 @@ public class GlobalExceptionHandler {
                       .body(ErrorResponse.create(ex,
                                                  HttpStatus.NOT_FOUND,
                                                  ex.getMessage()));
+    }
+
+    @ExceptionHandler(EmptyQueryException.class)
+    public ResponseEntity<ErrorResponse> handleEmptyQueryException(EmptyQueryException ex) {
+        return ResponseEntity.status(404)
+                             .body(ErrorResponse.create(ex,
+                                                        HttpStatus.NOT_FOUND,
+                                                        ex.getMessage()));
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
