@@ -9,18 +9,19 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@RequestMapping("/products")
 public class ProductController {
 
     @Autowired
     private IProductService productService;
 
-    @GetMapping("/products")
+    @GetMapping("/")
     public ResponseEntity<?> getAllProducts() {
         List<Product> products = productService.getAllProducts();
         return ResponseEntity.ok(products);
     }
 
-    @GetMapping("/products/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<?> getProductById(@PathVariable Long id) {
         Product product = productService.getProductById(id);
         if (product == null) {
@@ -30,19 +31,19 @@ public class ProductController {
         return ResponseEntity.ok(product);
     }
 
-    @PostMapping("/products/new")
+    @PostMapping("/new")
     public ResponseEntity<?> saveProduct(@RequestBody Product product) {
         Product newProduct = productService.saveProduct(product);
         return ResponseEntity.ok(newProduct);
     }
 
-    @PutMapping("/products/update")
+    @PutMapping("/update")
     public ResponseEntity<?> updateProduct(@RequestBody Product product) {
         Product updatedProduct = productService.updateProduct(product);
         return ResponseEntity.ok(updatedProduct);
     }
 
-    @DeleteMapping("/products/delete/{id}")
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteProduct(@PathVariable Long id) {
         Boolean deleted = productService.deleteProduct(id);
 
@@ -54,4 +55,11 @@ public class ProductController {
         return ResponseEntity.status(404)
                              .body("Product not found");
     }
+
+    @GetMapping("/low_stock")
+    public ResponseEntity<?> getLowStockProducts() {
+        List<Product> lowStockProducts = productService.getLowStockProducts();
+        return ResponseEntity.ok(lowStockProducts);
+    }
+
 }

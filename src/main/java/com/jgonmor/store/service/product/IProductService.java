@@ -15,4 +15,6 @@ public interface IProductService {
     Boolean deleteProduct(Long id);
 
     Product updateProduct(Product product);
+
+    List<Product> getLowStockProducts();
 }

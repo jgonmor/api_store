@@ -1,6 +1,7 @@
 package com.jgonmor.store.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jgonmor.store.exceptions.EmptyQueryException;
 import com.jgonmor.store.model.Product;
 import com.jgonmor.store.service.product.IProductService;
 import org.junit.jupiter.api.Test;
@@ -36,7 +37,7 @@ public class ProductControllerIntegrationTest {
 
     @Test
     public void testGetAllProductsStatus200() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/products")
+        mockMvc.perform(MockMvcRequestBuilders.get("/products/")
                                               .contentType("application/json"))
                .andExpect(MockMvcResultMatchers.status()
                                                .isOk())
@@ -53,7 +54,7 @@ public class ProductControllerIntegrationTest {
         Mockito.when(productService.getAllProducts()).thenReturn(Arrays.asList(product1, product2));
 
         // Act & Assert
-        mockMvc.perform(MockMvcRequestBuilders.get("/products")
+        mockMvc.perform(MockMvcRequestBuilders.get("/products/")
                                 .contentType(MediaType.APPLICATION_JSON))
                .andExpect(status().isOk())
                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -166,5 +167,38 @@ public class ProductControllerIntegrationTest {
                .andExpect(content().string("Product not found"));
     }
 
+    @Test
+    void getLowStockProducts_shouldReturnStatus200() throws Exception {
+        // Arrange
+        Product product1 = new Product(1L, "Product 1","brand 1" ,100.0, 10);
+        Product product2 = new Product(2L, "Product 2", "brand 2" ,200.0, 20);
+        Mockito.when(productService.getLowStockProducts()).thenReturn(Arrays.asList(product1, product2));
+
+        // Act & Assert
+        mockMvc.perform(MockMvcRequestBuilders.get("/products/low_stock")
+                                              .contentType("application/json"))
+               .andExpect(MockMvcResultMatchers.status()
+                                               .isOk())
+               .andExpect(MockMvcResultMatchers
+                                  .content()
+                                  .contentType("application/json"));
+    }
+
+    @Test
+    void getLowStockProducts_shouldReturnStatus404() throws Exception {
+        // Arrange
+
+        Mockito.when(productService.getLowStockProducts()).thenThrow(new EmptyQueryException("There are no products with low stock"));
+
+        // Act & Assert
+            mockMvc.perform(MockMvcRequestBuilders.get("/products/low_stock")
+                                                  .contentType("application/json"))
+                   .andExpect(MockMvcResultMatchers.status()
+                                                   .isNotFound());
+            // Assert
+            verify(productService, times(1)).getLowStockProducts();
+
+
+    }
 
 }

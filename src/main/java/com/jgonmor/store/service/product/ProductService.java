@@ -1,5 +1,6 @@
 package com.jgonmor.store.service.product;
 
+import com.jgonmor.store.exceptions.EmptyQueryException;
 import com.jgonmor.store.exceptions.EmptyTableException;
 import com.jgonmor.store.exceptions.ResourceNotFoundException;
 import com.jgonmor.store.model.Product;
@@ -49,6 +50,15 @@ public class ProductService implements IProductService {
     public Product updateProduct(Product product) {
         this.existOrException(product.getId());
         return this.saveProduct(product);
+    }
+
+    @Override
+    public List<Product> getLowStockProducts() {
+        List<Product> products = productRepository.findLowStockProducts();
+        if(products.isEmpty()){
+            throw new EmptyQueryException("There are no products with low stock");
+        }
+        return products;
     }
 
 
