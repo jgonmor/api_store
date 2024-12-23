@@ -28,15 +28,15 @@ public class ClientService implements IClientService{
 
     @Override
     public ClientDto getClientById(Long id) {
-        Client client = this.existOrException(id);
-        return this.toDto(client);
+        Client client = clientRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Client not found"));
+        return ClientDto.fromEntity(client);
     }
 
     @Override
     public ClientDto saveClient(ClientDto clientDto) {
-        Client client = this.toEntity(clientDto);
+        Client client = ClientDto.toEntity(clientDto);
         Client savedClient = clientRepository.save(client);
-        return this.toDto(savedClient);
+        return ClientDto.fromEntity(savedClient);
     }
 
     @Override
@@ -56,27 +56,17 @@ public class ClientService implements IClientService{
         return this.saveClient(client);
     }
 
-    private Client existOrException(Long id){
-        return clientRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Client not found"));
+    private void existOrException(Long id){
+        boolean exists = clientRepository.existsById(id);
+        if(!exists){
+            throw new ResourceNotFoundException("Client not found");
+        }
     }
 
-    public ClientDto toDto(Client client) {
-        return new ClientDto(client.getId(),
-                             client.getName(),
-                             client.getLastName(),
-                             client.getCitizenId());
-    }
-
-    public Client toEntity(ClientDto client) {
-        return new Client(client.getId(),
-                          client.getName(),
-                          client.getLastName(),
-                          client.getCitizenId());
-    }
 
     public List<ClientDto> toDtoList(List<Client> clients) {
         return clients.stream()
-                      .map(this::toDto)
+                      .map(ClientDto::fromEntity)
                       .toList();
     }
 

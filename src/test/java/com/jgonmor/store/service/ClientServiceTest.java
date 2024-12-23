@@ -76,7 +76,7 @@ public class ClientServiceTest {
         // Arrange
         Client client = new Client(null, "client 1", "Last 1", "12345678A");
         Client savedClient = new Client(1L, "client 1", "Last 1", "12345678A");
-        ClientDto clientDto = clientService.toDto(client);
+        ClientDto clientDto = ClientDto.fromEntity(client);
 
         when(clientRepository.save(client)).thenReturn(savedClient);
 
@@ -94,7 +94,7 @@ public class ClientServiceTest {
         // Arrange
         Long id = 1L;
         Client client = new Client(1L, "client 1", "Last 1", "12345678A");
-        when(clientRepository.findById(id)).thenReturn(Optional.of(client));
+        when(clientRepository.existsById(id)).thenReturn(true);
 
         // Act
         Boolean result = clientService.deleteClient(id);
@@ -102,7 +102,7 @@ public class ClientServiceTest {
         // Assert
         assertTrue(result);
         verify(clientRepository, times(1)).deleteById(id);
-        verify(clientRepository, times(1)).findById(id);
+        verify(clientRepository, times(1)).existsById(id);
     }
 
     @Test
@@ -124,7 +124,7 @@ public class ClientServiceTest {
         Client updatedEntity = new Client(1L, "client updated", "Last 1", "12345678A");
         ClientDto updatedClient = new ClientDto(1L, "client updated", "Last 1", "12345678A");
 
-        when(clientRepository.findById(1L)).thenReturn(Optional.of(client));
+        when(clientRepository.existsById(1L)).thenReturn(true);
 
         when(clientRepository.save(any(Client.class))).thenReturn(updatedEntity);
 
