@@ -199,5 +199,25 @@ public class SellControllerIntegrationTest {
                .andExpect(content().string("Sell not found"));
     }
 
+    @Test
+    void getSellProducts_shouldReturnProducts() throws Exception {
+        // Arrange
+        Sell sell = new Sell(1L,
+                             LocalDateTime.now(),
+                             100d,
+                             products,
+                             defaultClient);
+        when(sellService.getProductsFromSell(1L)).thenReturn(products);
+
+        // Act & Assert
+        mockMvc.perform(MockMvcRequestBuilders.get("/sells/products/1")
+                                              .contentType(MediaType.APPLICATION_JSON))
+               .andExpect(status().isOk())
+               .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+               .andExpect(jsonPath("$", hasSize(3)))
+               .andExpect(jsonPath("$[0].id", is(1)))
+               .andExpect(jsonPath("$[1].id", is(2)))
+               .andExpect(jsonPath("$[2].id", is(3)));
+    }
 
 }

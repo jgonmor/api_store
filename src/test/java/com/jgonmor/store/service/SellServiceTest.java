@@ -197,4 +197,24 @@ public class SellServiceTest {
         assertEquals(updatedSell, result);
         verify(sellRepository, times(1)).save(sell);
     }
+
+    @Test
+    void testGetProductsBySellId() {
+        // Arrange
+        Sell sell = new Sell(1L,
+                             LocalDateTime.now(),
+                             100d,
+                             products,
+                             defaultClient);
+        when(sellRepository.existsById(1L)).thenReturn(true);
+        when(sellRepository.findProductsBySellId(1L)).thenReturn(products);
+
+        // Act
+        List<Product> result = sellService.getProductsFromSell(1L);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(products, result);
+        verify(sellRepository, times(1)).findProductsBySellId(1L);
+    }
 }

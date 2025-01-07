@@ -1,10 +1,9 @@
 package com.jgonmor.store.service.sell;
 
-import com.jgonmor.store.dto.ClientDto;
 import com.jgonmor.store.dto.SellDto;
 import com.jgonmor.store.exceptions.EmptyTableException;
 import com.jgonmor.store.exceptions.ResourceNotFoundException;
-import com.jgonmor.store.model.Client;
+import com.jgonmor.store.model.Product;
 import com.jgonmor.store.model.Sell;
 import com.jgonmor.store.repository.ISellRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,6 +52,12 @@ public class SellService implements ISellService{
     public Sell updateSell(Sell sell) {
         this.existOrException(sell.getId());
         return this.saveSell(sell);
+    }
+
+    @Override
+    public List<Product> getProductsFromSell(Long sellId) {
+        this.existOrException(sellId);
+        return sellRepository.findProductsBySellId(sellId);
     }
 
     private void existOrException(Long id){

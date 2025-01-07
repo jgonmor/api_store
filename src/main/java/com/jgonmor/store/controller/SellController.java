@@ -1,5 +1,6 @@
 package com.jgonmor.store.controller;
 
+import com.jgonmor.store.model.Product;
 import com.jgonmor.store.model.Sell;
 import com.jgonmor.store.service.sell.ISellService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,5 +54,11 @@ public class SellController {
 
         return ResponseEntity.status(404)
                              .body("Sell not found");
+    }
+
+    @GetMapping("/sells/products/{sellId}")
+    public ResponseEntity<?> getSellProducts(@PathVariable Long sellId) {
+        List<Product> products = sellService.getProductsFromSell(sellId);
+        return ResponseEntity.ok(products);
     }
 }
