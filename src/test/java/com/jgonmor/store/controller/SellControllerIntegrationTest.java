@@ -1,6 +1,7 @@
 package com.jgonmor.store.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jgonmor.store.dto.SellDto;
 import com.jgonmor.store.model.Client;
 import com.jgonmor.store.model.Product;
 import com.jgonmor.store.model.Sell;
@@ -16,6 +17,7 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.http.MediaType;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -75,7 +77,10 @@ public class SellControllerIntegrationTest {
                               200d,
                               products,
                               defaultClient);
-        Mockito.when(sellService.getAllSells()).thenReturn(Arrays.asList(sell1, sell2));
+
+        List<SellDto> sells = Arrays.asList(SellDto.fromEntity(sell1), SellDto.fromEntity(sell2));
+
+        Mockito.when(sellService.getAllSells()).thenReturn(sells);
 
         // Act & Assert
         mockMvc.perform(MockMvcRequestBuilders.get("/sells")
@@ -218,6 +223,24 @@ public class SellControllerIntegrationTest {
                .andExpect(jsonPath("$[0].id", is(1)))
                .andExpect(jsonPath("$[1].id", is(2)))
                .andExpect(jsonPath("$[2].id", is(3)));
+    }
+
+    @Test
+    void getTotalFromSellsOnDay_shouldReturnTotal() throws Exception {
+        // Arrange
+        Sell sell = new Sell(1L,
+                             LocalDateTime.now(),
+                             100d,
+                             products,
+                             defaultClient);
+        when(sellService.getTotalFromSellsOnDay(LocalDate.parse("2025-01-01"))).thenReturn(100.00);
+
+        // Act & Assert
+        mockMvc.perform(MockMvcRequestBuilders.get("/sells/total/2025-01-01")
+                                              .contentType(MediaType.APPLICATION_JSON))
+               .andExpect(status().isOk())
+               .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+               .andExpect(content().string("100.0"));
     }
 
 }

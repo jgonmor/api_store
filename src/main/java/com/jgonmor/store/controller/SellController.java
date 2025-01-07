@@ -1,12 +1,16 @@
 package com.jgonmor.store.controller;
 
+import com.jgonmor.store.dto.SellDto;
 import com.jgonmor.store.model.Product;
 import com.jgonmor.store.model.Sell;
 import com.jgonmor.store.service.sell.ISellService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -17,7 +21,7 @@ public class SellController {
 
     @GetMapping("/sells")
     public ResponseEntity<?> getAllSells() {
-        List<Sell> sells = sellService.getAllSells();
+        List<SellDto> sells = sellService.getAllSells();
         return ResponseEntity.ok(sells);
     }
 
@@ -60,5 +64,11 @@ public class SellController {
     public ResponseEntity<?> getSellProducts(@PathVariable Long sellId) {
         List<Product> products = sellService.getProductsFromSell(sellId);
         return ResponseEntity.ok(products);
+    }
+
+    @GetMapping("/sells/total/{date}")
+    public ResponseEntity<?> getTotalFromSellsOnDay(@PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        Double total = sellService.getTotalFromSellsOnDay(date);
+        return ResponseEntity.ok(total);
     }
 }

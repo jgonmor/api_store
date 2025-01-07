@@ -9,6 +9,8 @@ import com.jgonmor.store.repository.ISellRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -18,9 +20,12 @@ public class SellService implements ISellService{
     ISellRepository sellRepository;
 
     @Override
-    public List<Sell> getAllSells() {
+    public List<SellDto> getAllSells() {
 
-        List<Sell> sells = sellRepository.findAll();
+        List<SellDto> sells = sellRepository.findAll()
+                                            .stream()
+                                            .map(SellDto::fromEntity)
+                                            .toList();
 
         if(sells.isEmpty()){
             throw new EmptyTableException("There are no sells");
@@ -60,6 +65,16 @@ public class SellService implements ISellService{
         return sellRepository.findProductsBySellId(sellId);
     }
 
+    @Override
+    public Double getTotalFromSellsOnDay(LocalDate date) {
+
+        LocalDateTime start = date.atStartOfDay();
+        LocalDateTime end = date.atTime(23, 59, 59, 999999999);
+
+        return sellRepository.getTotalFromSellsOnDay(start, end);
+    }
+
+
     private void existOrException(Long id){
         boolean exists = sellRepository.existsById(id);
         if(!exists){
@@ -67,9 +82,5 @@ public class SellService implements ISellService{
         }
     }
 
-    public List<SellDto> toDtoList(List<Sell> sells) {
-        return sells.stream()
-                      .map(SellDto::fromEntity)
-                      .toList();
-    }
+
 }

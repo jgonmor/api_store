@@ -12,6 +12,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -216,5 +217,24 @@ public class SellServiceTest {
         assertNotNull(result);
         assertEquals(products, result);
         verify(sellRepository, times(1)).findProductsBySellId(1L);
+    }
+
+    @Test
+    void testGetTotalFromSellsOnDay() {
+        LocalDate date = LocalDate.now();
+
+        LocalDateTime start = date.atStartOfDay();
+        LocalDateTime end = date.atTime(23, 59, 59, 999999999);
+
+        when(sellRepository.getTotalFromSellsOnDay(start, end)).thenReturn(100.00);
+
+        // Act
+        Double result = sellService.getTotalFromSellsOnDay(date);
+
+        // Assert
+        assertNotNull(result);
+        verify(sellRepository, times(1)).getTotalFromSellsOnDay(start, end);
+        assertEquals(100.00, result);  // Assert the expected value
+
     }
 }

@@ -1,13 +1,16 @@
 package com.jgonmor.store.service.sell;
 
+import com.jgonmor.store.dto.SellDto;
 import com.jgonmor.store.model.Product;
 import com.jgonmor.store.model.Sell;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface ISellService {
 
-    List<Sell> getAllSells();
+    List<SellDto> getAllSells();
 
     Sell getSellById(Long id);
 
@@ -18,4 +21,7 @@ public interface ISellService {
     Sell updateSell(Sell sell);
 
     List<Product> getProductsFromSell(Long sellId);
+
+    Double getTotalFromSellsOnDay(LocalDate date);
+
 }
