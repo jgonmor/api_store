@@ -1,5 +1,6 @@
 package com.jgonmor.store.service.sell;
 
+import com.jgonmor.store.dto.SellClientNameDto;
 import com.jgonmor.store.dto.SellDto;
 import com.jgonmor.store.exceptions.EmptyTableException;
 import com.jgonmor.store.exceptions.ResourceNotFoundException;
@@ -72,6 +73,14 @@ public class SellService implements ISellService{
         LocalDateTime end = date.atTime(23, 59, 59, 999999999);
 
         return sellRepository.getTotalFromSellsOnDay(start, end);
+    }
+
+    @Override
+    public SellClientNameDto getSellWithClientName() {
+
+        Sell sell = sellRepository.findBiggestSell();
+
+        return SellClientNameDto.fromEntity(sell);
     }
 
 

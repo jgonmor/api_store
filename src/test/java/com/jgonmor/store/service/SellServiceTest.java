@@ -1,5 +1,6 @@
 package com.jgonmor.store.service;
 
+import com.jgonmor.store.dto.SellClientNameDto;
 import com.jgonmor.store.exceptions.ResourceNotFoundException;
 import com.jgonmor.store.model.Client;
 import com.jgonmor.store.model.Product;
@@ -236,5 +237,28 @@ public class SellServiceTest {
         verify(sellRepository, times(1)).getTotalFromSellsOnDay(start, end);
         assertEquals(100.00, result);  // Assert the expected value
 
+    }
+
+    @Test
+    void testGetBiggestSell() {
+        // Arrange
+        Sell sell = new Sell(1L,
+                             LocalDateTime.now(),
+                             100d,
+                             products,
+                             defaultClient);
+        when(sellRepository.findBiggestSell()).thenReturn(sell);
+
+        // Act
+        SellClientNameDto result = sellService.getSellWithClientName();
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(1L, result.getId());
+        assertEquals(100.00, result.getTotal());
+        assertEquals(3, result.getQuantity());
+        assertEquals("Juan", result.getName());
+        assertEquals("Gonzalez", result.getLastName());
+        verify(sellRepository, times(1)).findBiggestSell();
     }
 }

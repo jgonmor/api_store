@@ -10,18 +10,19 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@RequestMapping("/clients")
 public class ClientController {
 
     @Autowired
     private IClientService clientService;
 
-    @GetMapping("/clients")
+    @GetMapping("/")
     public ResponseEntity<?> getAllClients() {
         List<ClientDto> clients = clientService.getAllClients();
         return ResponseEntity.ok(clients);
     }
 
-    @GetMapping("/clients/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<?> getClientById(@PathVariable Long id) {
         ClientDto client = clientService.getClientById(id);
         if (client == null) {
@@ -31,19 +32,19 @@ public class ClientController {
         return ResponseEntity.ok(client);
     }
 
-    @PostMapping("/clients/new")
+    @PostMapping("/new")
     public ResponseEntity<?> saveClient(@RequestBody ClientDto client) {
         ClientDto newClient = clientService.saveClient(client);
         return ResponseEntity.ok(newClient);
     }
 
-    @PutMapping("/clients/update")
+    @PutMapping("/update")
     public ResponseEntity<?> updateClient(@RequestBody ClientDto client) {
         ClientDto updatedClient = clientService.updateClient(client);
         return ResponseEntity.ok(updatedClient);
     }
 
-    @DeleteMapping("/clients/delete/{id}")
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteClient(@PathVariable Long id) {
         Boolean deleted = clientService.deleteClient(id);
 

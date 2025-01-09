@@ -1,5 +1,6 @@
 package com.jgonmor.store.service.sell;
 
+import com.jgonmor.store.dto.SellClientNameDto;
 import com.jgonmor.store.dto.SellDto;
 import com.jgonmor.store.model.Product;
 import com.jgonmor.store.model.Sell;
@@ -23,5 +24,7 @@ public interface ISellService {
     List<Product> getProductsFromSell(Long sellId);
 
     Double getTotalFromSellsOnDay(LocalDate date);
+
+    SellClientNameDto getSellWithClientName();
 
 }

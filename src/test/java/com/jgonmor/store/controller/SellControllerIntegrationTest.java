@@ -1,6 +1,7 @@
 package com.jgonmor.store.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.jgonmor.store.dto.SellClientNameDto;
 import com.jgonmor.store.dto.SellDto;
 import com.jgonmor.store.model.Client;
 import com.jgonmor.store.model.Product;
@@ -241,6 +242,24 @@ public class SellControllerIntegrationTest {
                .andExpect(status().isOk())
                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                .andExpect(content().string("100.0"));
+    }
+
+    @Test
+    void getBiggestSell_shouldReturnBiggestSell() throws Exception {
+        // Arrange
+        SellClientNameDto sell = new SellClientNameDto(1L, 100.00, 10, "Juan", "González" );
+        when(sellService.getSellWithClientName()).thenReturn(sell);
+
+        // Act & Assert
+        mockMvc.perform(MockMvcRequestBuilders.get("/sells/biggest-sell")
+                                              .contentType(MediaType.APPLICATION_JSON))
+               .andExpect(status().isOk())
+               .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+               .andExpect(jsonPath("$.id", is(1)))
+               .andExpect(jsonPath("$.total", is(100.00)))
+               .andExpect(jsonPath("$.quantity", is(10)))
+               .andExpect(jsonPath("$.name", is("Juan")))
+               .andExpect(jsonPath("$.lastName", is("González")));
     }
 
 }

@@ -1,5 +1,6 @@
 package com.jgonmor.store.controller;
 
+import com.jgonmor.store.dto.SellClientNameDto;
 import com.jgonmor.store.dto.SellDto;
 import com.jgonmor.store.model.Product;
 import com.jgonmor.store.model.Sell;
@@ -14,18 +15,19 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
+@RequestMapping("/sells")
 public class SellController {
 
     @Autowired
     private ISellService sellService;
 
-    @GetMapping("/sells")
+    @GetMapping("/")
     public ResponseEntity<?> getAllSells() {
         List<SellDto> sells = sellService.getAllSells();
         return ResponseEntity.ok(sells);
     }
 
-    @GetMapping("/sells/{id}")
+    @GetMapping("/{id}")
     public ResponseEntity<?> getSellById(@PathVariable Long id) {
         Sell sell = sellService.getSellById(id);
         if (sell == null) {
@@ -35,19 +37,19 @@ public class SellController {
         return ResponseEntity.ok(sell);
     }
 
-    @PostMapping("/sells/new")
+    @PostMapping("/new")
     public ResponseEntity<?> saveSell(@RequestBody Sell sell) {
         Sell newSell = sellService.saveSell(sell);
         return ResponseEntity.ok(newSell);
     }
 
-    @PutMapping("/sells/update")
+    @PutMapping("/update")
     public ResponseEntity<?> updateSell(@RequestBody Sell sell) {
         Sell updatedSell = sellService.updateSell(sell);
         return ResponseEntity.ok(updatedSell);
     }
 
-    @DeleteMapping("/sells/delete/{id}")
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteSell(@PathVariable Long id) {
         Boolean deleted = sellService.deleteSell(id);
 
@@ -60,15 +62,21 @@ public class SellController {
                              .body("Sell not found");
     }
 
-    @GetMapping("/sells/products/{sellId}")
+    @GetMapping("/products/{sellId}")
     public ResponseEntity<?> getSellProducts(@PathVariable Long sellId) {
         List<Product> products = sellService.getProductsFromSell(sellId);
         return ResponseEntity.ok(products);
     }
 
-    @GetMapping("/sells/total/{date}")
+    @GetMapping("/total/{date}")
     public ResponseEntity<?> getTotalFromSellsOnDay(@PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
         Double total = sellService.getTotalFromSellsOnDay(date);
         return ResponseEntity.ok(total);
+    }
+
+    @GetMapping("/biggest-sell")
+    public ResponseEntity<?> getBiggestSell(){
+        SellClientNameDto sell = sellService.getSellWithClientName();
+        return ResponseEntity.ok(sell);
     }
 }

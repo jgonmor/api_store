@@ -16,4 +16,7 @@ public interface ISellRepository extends JpaRepository<Sell, Long> {
 
     @Query("select sum(s.total) from Sell s where s.date >= :start and s.date <= :end")
     Double getTotalFromSellsOnDay(LocalDateTime start, LocalDateTime end);
+
+    @Query("select s from Sell s order by s.total desc limit 1")
+    Sell findBiggestSell();
 }
