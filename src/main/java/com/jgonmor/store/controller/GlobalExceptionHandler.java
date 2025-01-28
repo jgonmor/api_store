@@ -1,9 +1,7 @@
 package com.jgonmor.store.controller;
 
-import com.jgonmor.store.exceptions.EmptyQueryException;
-import com.jgonmor.store.exceptions.EmptyTableException;
+import com.jgonmor.store.exceptions.*;
 
-import com.jgonmor.store.exceptions.ResourceNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.ErrorResponse;
@@ -31,6 +29,22 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleResourceNotFoundException(ResourceNotFoundException ex) {
+        return ResponseEntity.status(404)
+                             .body(ErrorResponse.create(ex,
+                                                        HttpStatus.NOT_FOUND,
+                                                        ex.getMessage()));
+    }
+
+    @ExceptionHandler(RequiredParamNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleRequiredParamNotFoundException(RequiredParamNotFoundException ex) {
+        return ResponseEntity.status(400)
+                             .body(ErrorResponse.create(ex,
+                                                        HttpStatus.BAD_REQUEST,
+                                                        ex.getMessage()));
+    }
+
+    @ExceptionHandler(NotEnoughStockException.class)
+    public ResponseEntity<ErrorResponse> handleNotEnoughStockException(NotEnoughStockException ex) {
         return ResponseEntity.status(404)
                              .body(ErrorResponse.create(ex,
                                                         HttpStatus.NOT_FOUND,
