@@ -17,4 +17,8 @@ public interface IProductService {
     Product updateProduct(Product product);
 
     List<Product> getLowStockProducts();
+
+    void saveProducts(List<Product> productList);
+
+    void existOrException(Long id);
 }

@@ -1,5 +1,6 @@
 package com.jgonmor.store.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -18,22 +19,16 @@ public class Sell {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss.SS")
     private LocalDateTime date;
     private Double total;
 
-    @OneToMany
-    private List<Product> products;
+    @OneToMany(cascade = CascadeType.ALL, mappedBy = "sell")
+    private List<SellDetail> sellDetails;
 
     @ManyToOne
-    @JoinColumn(name = "client_id")
+    @JoinColumn(name = "client_id", nullable = false)
     private Client client;
 
-    public void addProduct(Product product) {
-        this.products.add(product);
-    }
-
-    public void removeProduct(Product product) {
-        this.products.remove(product);
-    }
 }
 

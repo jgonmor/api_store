@@ -6,20 +6,19 @@ import com.jgonmor.store.model.Product;
 import com.jgonmor.store.model.Sell;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 public interface ISellService {
 
     List<SellDto> getAllSells();
 
-    Sell getSellById(Long id);
+    SellDto getSellById(Long id);
 
     Boolean deleteSell(Long id);
 
-    Sell saveSell(Sell sell);
+    SellDto saveSell(Sell sell);
 
-    Sell updateSell(Sell sell);
+    SellDto updateSell(Sell sell);
 
     List<Product> getProductsFromSell(Long sellId);
 
@@ -27,4 +26,5 @@ public interface ISellService {
 
     SellClientNameDto getSellWithClientName();
 
+    List<SellDto> saveSells(List<Sell> sells);
 }

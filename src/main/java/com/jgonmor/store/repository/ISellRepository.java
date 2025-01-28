@@ -11,7 +11,7 @@ import java.util.List;
 
 @Repository
 public interface ISellRepository extends JpaRepository<Sell, Long> {
-    @Query("select s.products from Sell s where s.id = :sellId")
+    @Query("select s.product from SellDetail s where s.sell.id = :sellId")
     List<Product> findProductsBySellId(Long sellId);
 
     @Query("select sum(s.total) from Sell s where s.date >= :start and s.date <= :end")

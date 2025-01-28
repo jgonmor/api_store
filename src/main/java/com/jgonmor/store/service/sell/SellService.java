@@ -3,40 +3,53 @@ package com.jgonmor.store.service.sell;
 import com.jgonmor.store.dto.SellClientNameDto;
 import com.jgonmor.store.dto.SellDto;
 import com.jgonmor.store.exceptions.EmptyTableException;
+import com.jgonmor.store.exceptions.NotEnoughStockException;
+import com.jgonmor.store.exceptions.RequiredParamNotFoundException;
 import com.jgonmor.store.exceptions.ResourceNotFoundException;
+import com.jgonmor.store.mapper.Mapper;
 import com.jgonmor.store.model.Product;
 import com.jgonmor.store.model.Sell;
+import com.jgonmor.store.model.SellDetail;
 import com.jgonmor.store.repository.ISellRepository;
+import com.jgonmor.store.service.product.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class SellService implements ISellService{
+public class SellService implements ISellService {
 
     @Autowired
     ISellRepository sellRepository;
+
+    @Autowired
+    private ProductService productService;
+
 
     @Override
     public List<SellDto> getAllSells() {
 
         List<SellDto> sells = sellRepository.findAll()
                                             .stream()
-                                            .map(SellDto::fromEntity)
+                                            .map(Mapper::sellToDto)
                                             .toList();
 
-        if(sells.isEmpty()){
+        if (sells.isEmpty()) {
             throw new EmptyTableException("There are no sells");
         }
         return sells;
     }
 
     @Override
-    public Sell getSellById(Long id) {
-        return sellRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Sell not found"));
+    public SellDto getSellById(Long id) {
+
+        Sell sell = sellRepository.findById(id)
+                                  .orElseThrow(() -> new ResourceNotFoundException("Sell not found"));
+        return Mapper.sellToDto(sell);
     }
 
     @Override
@@ -50,13 +63,46 @@ public class SellService implements ISellService{
     }
 
     @Override
-    public Sell saveSell(Sell sell) {
-        return sellRepository.save(sell);
+    public SellDto saveSell(Sell sell) {
+
+        SellDto sellDto;
+
+        if (sell.getSellDetails()
+                .isEmpty()) {
+            throw new RequiredParamNotFoundException("Sell must have products");
+        }
+
+        this.fixStock(sell);
+
+        sell.getSellDetails()
+            .forEach(sellDetail -> {
+                if (sellDetail.getUnitPrice() == 0 && sellDetail.getProduct().getPrice() != null) {
+                    sellDetail.setUnitPrice(sellDetail.getProduct().getPrice());
+                }
+                else if(sellDetail.getUnitPrice() == 0) {
+                    throw new RequiredParamNotFoundException("Product or unit price must be provided");
+                }
+                sellDetail.setTotal(sellDetail.getQuantity() * sellDetail.getUnitPrice());
+
+                sellDetail.setSell(sell);
+            });
+
+
+        double total = sell.getSellDetails()
+                           .stream()
+                           .mapToDouble(SellDetail::getTotal)
+                           .sum();
+
+        sell.setTotal(total);
+
+        sellDto = Mapper.sellToDto(sell);
+        return sellDto;
     }
 
     @Override
-    public Sell updateSell(Sell sell) {
+    public SellDto updateSell(Sell sell) {
         this.existOrException(sell.getId());
+
         return this.saveSell(sell);
     }
 
@@ -70,9 +116,13 @@ public class SellService implements ISellService{
     public Double getTotalFromSellsOnDay(LocalDate date) {
 
         LocalDateTime start = date.atStartOfDay();
-        LocalDateTime end = date.atTime(23, 59, 59, 999999999);
+        LocalDateTime end = date.atTime(23,
+                                        59,
+                                        59,
+                                        999999999);
 
-        return sellRepository.getTotalFromSellsOnDay(start, end);
+        return sellRepository.getTotalFromSellsOnDay(start,
+                                                     end);
     }
 
     @Override
@@ -83,12 +133,48 @@ public class SellService implements ISellService{
         return SellClientNameDto.fromEntity(sell);
     }
 
+    @Override
+    public List<SellDto> saveSells(List<Sell> sells) {
 
-    private void existOrException(Long id){
+        List<SellDto> sellDtos;
+
+        sells.forEach(this::fixStock);
+
+        sellRepository.saveAll(sells);
+
+        sellDtos = Mapper.sellsToDtoList(sells);
+
+        return sellDtos;
+    }
+
+
+    public void existOrException(Long id) {
         boolean exists = sellRepository.existsById(id);
-        if(!exists){
+        if (!exists) {
             throw new ResourceNotFoundException("Sell not found");
         }
+    }
+
+    private void fixStock(Sell sell){
+
+        List<Product> productList = new ArrayList<>();
+
+        sell.getSellDetails()
+            .forEach(sellDetail -> {
+
+                Product product = productService.getProductById(sellDetail.getProduct()
+                                                                          .getId());
+                if(product.getStock() < sellDetail.getQuantity() ){
+                    throw new NotEnoughStockException("Not enough stock for product " + product.getName()
+                                                              + " (id " + product.getId() + ")");
+                }
+
+                product.setStock(product.getStock() - sellDetail.getQuantity());
+                productList.add(product);
+            });
+
+        productService.saveProducts(productList);
+
     }
 
 

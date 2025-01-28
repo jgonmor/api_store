@@ -1,5 +1,7 @@
 package com.jgonmor.store.controller;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jgonmor.store.dto.SellClientNameDto;
 import com.jgonmor.store.dto.SellDto;
 import com.jgonmor.store.model.Product;
@@ -11,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -21,6 +22,9 @@ public class SellController {
     @Autowired
     private ISellService sellService;
 
+    @Autowired
+    private ObjectMapper objectMapper;
+
     @GetMapping("/")
     public ResponseEntity<?> getAllSells() {
         List<SellDto> sells = sellService.getAllSells();
@@ -29,7 +33,7 @@ public class SellController {
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getSellById(@PathVariable Long id) {
-        Sell sell = sellService.getSellById(id);
+        SellDto sell = sellService.getSellById(id);
         if (sell == null) {
             return ResponseEntity.status(404)
                                  .body("Sell not found");
@@ -38,14 +42,27 @@ public class SellController {
     }
 
     @PostMapping("/new")
-    public ResponseEntity<?> saveSell(@RequestBody Sell sell) {
-        Sell newSell = sellService.saveSell(sell);
-        return ResponseEntity.ok(newSell);
+    public ResponseEntity<?> saveSell(@RequestBody Object request) {
+
+        if (request instanceof List) {
+            List<Sell> sells = objectMapper.convertValue(request,
+                                                         new TypeReference<List<Sell>>() {}
+            );
+            sellService.saveSells(sells);
+            return ResponseEntity.ok("Sells saved");
+        } else if (request instanceof java.util.Map) {
+            Sell sell = objectMapper.convertValue(request, Sell.class);
+            sellService.saveSell(sell);
+            return ResponseEntity.ok("Sell saved");
+        } else {
+            return ResponseEntity.badRequest().body("Request not valid");
+        }
+
     }
 
     @PutMapping("/update")
     public ResponseEntity<?> updateSell(@RequestBody Sell sell) {
-        Sell updatedSell = sellService.updateSell(sell);
+        SellDto updatedSell = sellService.updateSell(sell);
         return ResponseEntity.ok(updatedSell);
     }
 

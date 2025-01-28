@@ -28,7 +28,9 @@ public class ProductService implements IProductService {
 
     @Override
     public Product getProductById(Long id) {
-        return this.existOrException(id);
+
+        return productRepository.findById(id)
+                                .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
     }
 
     @Override
@@ -61,8 +63,15 @@ public class ProductService implements IProductService {
         return products;
     }
 
+    @Override
+    public void saveProducts(List<Product> productList) {
+        productRepository.saveAll(productList);
+    }
 
-    private Product existOrException(Long id){
-        return productRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Product not found"));
+
+    public void existOrException(Long id){
+        if(!productRepository.existsById(id)){
+            throw new ResourceNotFoundException("Product not found");
+        }
     }
 }

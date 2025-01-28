@@ -23,18 +23,5 @@ public class Product {
     private Double price;
     private Integer stock;
 
-    public Product(String name, String brand, Double price, Integer stock) {
-        this.name = name;
-        this.brand = brand;
-        this.price = price;
-        this.stock = stock;
-    }
 
-    public void addStock(int stock) {
-        this.stock += stock;
-    }
-
-    public void removeStock(int stock) {
-        this.stock -= stock;
-    }
 }
