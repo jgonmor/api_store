@@ -25,7 +25,7 @@ public class SellController {
     @Autowired
     private ObjectMapper objectMapper;
 
-    @GetMapping("/")
+    @GetMapping
     public ResponseEntity<?> getAllSells() {
         List<SellDto> sells = sellService.getAllSells();
         return ResponseEntity.ok(sells);
@@ -44,6 +44,8 @@ public class SellController {
     @PostMapping("/new")
     public ResponseEntity<?> saveSell(@RequestBody Object request) {
 
+        SellDto response;
+
         if (request instanceof List) {
             List<Sell> sells = objectMapper.convertValue(request,
                                                          new TypeReference<List<Sell>>() {}
@@ -52,8 +54,9 @@ public class SellController {
             return ResponseEntity.ok("Sells saved");
         } else if (request instanceof java.util.Map) {
             Sell sell = objectMapper.convertValue(request, Sell.class);
-            sellService.saveSell(sell);
-            return ResponseEntity.ok("Sell saved");
+            response = sellService.saveSell(sell);
+
+            return ResponseEntity.ok(response);
         } else {
             return ResponseEntity.badRequest().body("Request not valid");
         }

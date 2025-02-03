@@ -1,11 +1,14 @@
 package com.jgonmor.store.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 import com.jgonmor.store.dto.SellClientNameDto;
 import com.jgonmor.store.dto.SellDto;
+import com.jgonmor.store.mapper.Mapper;
 import com.jgonmor.store.model.Client;
 import com.jgonmor.store.model.Product;
 import com.jgonmor.store.model.Sell;
+import com.jgonmor.store.model.SellDetail;
 import com.jgonmor.store.service.sell.ISellService;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -20,6 +23,7 @@ import org.springframework.http.MediaType;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.List;
 
@@ -47,6 +51,12 @@ public class SellControllerIntegrationTest {
             new Product(3L,"product 3", "Brand 3", 30.0, 3)
     );
 
+    private final List<SellDetail> sellDetails = List.of(
+            new SellDetail(1L, 10.0, 1, 10.0, null, products.get(0)),
+            new SellDetail(2L, 20.0, 1, 20.0, null, products.get(1)),
+            new SellDetail(3L, 30.0, 1, 30.0, null, products.get(2))
+    );
+
     private final Client defaultClient = new Client(
             1L,
             "Juan",
@@ -71,15 +81,15 @@ public class SellControllerIntegrationTest {
         Sell sell1 = new Sell(1L,
                               LocalDateTime.now(),
                               100d,
-                              products,
+                              sellDetails,
                               defaultClient);
         Sell sell2 = new Sell(2L,
                               LocalDateTime.now(),
                               200d,
-                              products,
+                              sellDetails,
                               defaultClient);
 
-        List<SellDto> sells = Arrays.asList(SellDto.fromEntity(sell1), SellDto.fromEntity(sell2));
+        List<SellDto> sells = Mapper.sellsToDtoList(Arrays.asList(sell1, sell2));
 
         Mockito.when(sellService.getAllSells()).thenReturn(sells);
 
@@ -98,9 +108,10 @@ public class SellControllerIntegrationTest {
         Sell sell = new Sell(1L,
                              LocalDateTime.now(),
                              100d,
-                             products,
+                             sellDetails,
                              defaultClient);
-        Mockito.when(sellService.getSellById(1L)).thenReturn(sell);
+        SellDto sellDto = Mapper.sellToDto(sell);
+        Mockito.when(sellService.getSellById(1L)).thenReturn(sellDto);
 
         mockMvc.perform(MockMvcRequestBuilders.get("/sells/1")
                                               .contentType("application/json"))
@@ -115,9 +126,10 @@ public class SellControllerIntegrationTest {
         Sell sell = new Sell(1L,
                              LocalDateTime.now(),
                              100d,
-                             products,
+                             sellDetails,
                              defaultClient);
-        when(sellService.getSellById(1L)).thenReturn(sell);
+        SellDto sellDto = Mapper.sellToDto(sell);
+        when(sellService.getSellById(1L)).thenReturn(sellDto);
 
         // Act & Assert
         mockMvc.perform(MockMvcRequestBuilders.get("/sells/1")
@@ -142,19 +154,21 @@ public class SellControllerIntegrationTest {
         Sell sell = new Sell(1L,
                               LocalDateTime.now(),
                               100d,
-                              products,
+                             sellDetails,
                               defaultClient);
+        SellDto sellDto = Mapper.sellToDto(sell);
         Sell savedSell = new Sell(1L,
                               LocalDateTime.now(),
                               100d,
-                              products,
+                                  sellDetails,
                               defaultClient);
-        Mockito.when(sellService.saveSell(Mockito.any(Sell.class))).thenReturn(savedSell);
+        SellDto savedSellDto = Mapper.sellToDto(savedSell);
+        Mockito.when(sellService.saveSell(Mockito.any(Sell.class))).thenReturn(savedSellDto);
 
         // Act & Assert
         mockMvc.perform(post("/sells/new")
                                 .contentType(MediaType.APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(sell)))
+                                .content(objectMapper.writeValueAsString(sellDto)))
                .andExpect(status().isOk())
                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                .andExpect(jsonPath("$.id", is(1)))
@@ -165,11 +179,13 @@ public class SellControllerIntegrationTest {
     void updateSell_shouldReturnUpdatedSell() throws Exception {
         // Arrange
         Sell sell = new Sell(1L,
-                             LocalDateTime.now(),
+                             LocalDateTime.now().truncatedTo(ChronoUnit.MILLIS),
                              150d,
-                             products,
+                             sellDetails,
                              defaultClient);
-        Mockito.when(sellService.updateSell(Mockito.any(Sell.class))).thenReturn(sell);
+
+        SellDto sellDto = Mapper.sellToDto(sell);
+        Mockito.when(sellService.updateSell(Mockito.any(Sell.class))).thenReturn(sellDto);
 
         // Act & Assert
         mockMvc.perform(put("/sells/update")
@@ -211,7 +227,7 @@ public class SellControllerIntegrationTest {
         Sell sell = new Sell(1L,
                              LocalDateTime.now(),
                              100d,
-                             products,
+                             sellDetails,
                              defaultClient);
         when(sellService.getProductsFromSell(1L)).thenReturn(products);
 
@@ -232,7 +248,7 @@ public class SellControllerIntegrationTest {
         Sell sell = new Sell(1L,
                              LocalDateTime.now(),
                              100d,
-                             products,
+                             sellDetails,
                              defaultClient);
         when(sellService.getTotalFromSellsOnDay(LocalDate.parse("2025-01-01"))).thenReturn(100.00);
 
@@ -246,8 +262,9 @@ public class SellControllerIntegrationTest {
 
     @Test
     void getBiggestSell_shouldReturnBiggestSell() throws Exception {
+
         // Arrange
-        SellClientNameDto sell = new SellClientNameDto(1L, 100.00, 10, "Juan", "González" );
+        SellClientNameDto sell = new SellClientNameDto(1L, 100.00, sellDetails, "Juan", "González" );
         when(sellService.getSellWithClientName()).thenReturn(sell);
 
         // Act & Assert
@@ -257,7 +274,34 @@ public class SellControllerIntegrationTest {
                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                .andExpect(jsonPath("$.id", is(1)))
                .andExpect(jsonPath("$.total", is(100.00)))
-               .andExpect(jsonPath("$.quantity", is(10)))
+               .andExpect(jsonPath("$.sellDetails", hasSize(3)))
+               .andExpect(jsonPath("$.sellDetails[0].id", is(1)))
+               .andExpect(jsonPath("$.sellDetails[0].unitPrice", is(sellDetails.get(0).getUnitPrice())))
+               .andExpect(jsonPath("$.sellDetails[0].quantity", is(sellDetails.get(0).getQuantity())))
+               .andExpect(jsonPath("$.sellDetails[0].total", is(sellDetails.get(0).getTotal())))
+               .andExpect(jsonPath("$.sellDetails[0].product.id", is(1)))
+               .andExpect(jsonPath("$.sellDetails[0].product.name", is(sellDetails.get(0).getProduct().getName())))
+               .andExpect(jsonPath("$.sellDetails[0].product.brand", is(sellDetails.get(0).getProduct().getBrand())))
+               .andExpect(jsonPath("$.sellDetails[0].product.price", is(sellDetails.get(0).getProduct().getPrice())))
+               .andExpect(jsonPath("$.sellDetails[0].product.stock", is(sellDetails.get(0).getProduct().getStock())))
+               .andExpect(jsonPath("$.sellDetails[1].id", is(2)))
+               .andExpect(jsonPath("$.sellDetails[1].unitPrice", is(sellDetails.get(1).getUnitPrice())))
+               .andExpect(jsonPath("$.sellDetails[1].quantity", is(sellDetails.get(1).getQuantity())))
+               .andExpect(jsonPath("$.sellDetails[1].total", is(sellDetails.get(1).getTotal())))
+               .andExpect(jsonPath("$.sellDetails[1].product.id", is(2)))
+               .andExpect(jsonPath("$.sellDetails[1].product.name", is(sellDetails.get(1).getProduct().getName())))
+               .andExpect(jsonPath("$.sellDetails[1].product.brand", is(sellDetails.get(1).getProduct().getBrand())))
+               .andExpect(jsonPath("$.sellDetails[1].product.price", is(sellDetails.get(1).getProduct().getPrice())))
+               .andExpect(jsonPath("$.sellDetails[1].product.stock", is(sellDetails.get(1).getProduct().getStock())))
+               .andExpect(jsonPath("$.sellDetails[2].id", is(3)))
+               .andExpect(jsonPath("$.sellDetails[2].unitPrice", is(sellDetails.get(2).getUnitPrice())))
+               .andExpect(jsonPath("$.sellDetails[2].quantity", is(sellDetails.get(2).getQuantity())))
+               .andExpect(jsonPath("$.sellDetails[2].total", is(sellDetails.get(2).getTotal())))
+               .andExpect(jsonPath("$.sellDetails[2].product.id", is(3)))
+               .andExpect(jsonPath("$.sellDetails[2].product.name", is(sellDetails.get(2).getProduct().getName())))
+               .andExpect(jsonPath("$.sellDetails[2].product.brand", is(sellDetails.get(2).getProduct().getBrand())))
+               .andExpect(jsonPath("$.sellDetails[2].product.price", is(sellDetails.get(2).getProduct().getPrice())))
+               .andExpect(jsonPath("$.sellDetails[2].product.stock", is(sellDetails.get(2).getProduct().getStock())))
                .andExpect(jsonPath("$.name", is("Juan")))
                .andExpect(jsonPath("$.lastName", is("González")));
     }
