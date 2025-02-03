@@ -109,7 +109,7 @@ public class ClientControllerIntegrationTest {
     @Test
     void saveClient_shouldReturnSavedClient() throws Exception {
         // Arrange
-        Client client = new Client(null, "client 1", "Last 1", "12345678A");
+        ClientDto client = new ClientDto(1L, "client 1", "Last 1", "12345678A");
         ClientDto savedClient = new ClientDto(1L, "client 1", "Last 1", "12345678A");
         when(clientService.saveClient(Mockito.any(ClientDto.class))).thenReturn(savedClient);
 
