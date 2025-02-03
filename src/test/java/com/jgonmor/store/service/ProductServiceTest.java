@@ -4,11 +4,11 @@ import com.jgonmor.store.exceptions.ResourceNotFoundException;
 import com.jgonmor.store.model.Product;
 import com.jgonmor.store.repository.IProductRepository;
 import com.jgonmor.store.service.product.ProductService;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -16,6 +16,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 public class ProductServiceTest {
 
     @Mock
@@ -24,10 +25,6 @@ public class ProductServiceTest {
     @InjectMocks
     private ProductService productService;
 
-    @BeforeEach
-    public void setUp() {
-        MockitoAnnotations.initMocks(this);
-    }
 
     @Test
     void testGetAllProducts() {
@@ -92,8 +89,8 @@ public class ProductServiceTest {
     void testDeleteProduct() {
         // Arrange
         Long id = 1L;
-        Product product = new Product(id, "product 1", "Brand 1", 10.0, 5);
-        when(productRepository.findById(id)).thenReturn(Optional.of(product));
+
+        when(productRepository.existsById(id)).thenReturn(true);
 
         // Act
         Boolean result = productService.deleteProduct(id);
@@ -101,13 +98,12 @@ public class ProductServiceTest {
         // Assert
         assertTrue(result);
         verify(productRepository, times(1)).deleteById(id);
-        verify(productRepository, times(1)).findById(id);
     }
 
     @Test
     void testDeleteProductNotFound() {
         // Arrange
-        when(productRepository.findById(1L)).thenReturn(Optional.empty());
+        when(productRepository.existsById(1L)).thenReturn(false);
 
         // Act
         assertThrows(ResourceNotFoundException.class, () -> productService.deleteProduct(1L));
@@ -117,19 +113,21 @@ public class ProductServiceTest {
     @Test
     void testUpdateProduct() {
         // Arrange
-        Product product = new Product(1L, "product 1", "Brand 1", 10.0, 5);
-        Product updatedProduct = new Product(1L, "product 1 updated", "Brand 1 updated", 10.0, 5);
+        Product product = new Product(1L, "product 1", "Brand 1", 10.0, 15);
+        Product updatedProduct = new Product(1L, "product 1 updated", "Brand 1 updated", 15.0, 10);
 
-        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
-        when(productService.updateProduct(product)).thenReturn(updatedProduct);
+        when(productRepository.existsById(product.getId())).thenReturn(true);
+        when(productRepository.save(any(Product.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         // Act
-        Product result = productService.updateProduct(product);
+        Product result = productService.updateProduct(updatedProduct);
 
         // Assert
         assertNotNull(result);
-        assertEquals(updatedProduct, result);
-        verify(productRepository, times(1)).save(product);
+        assertEquals("product 1 updated", result.getName());
+        assertEquals(15.0, result.getPrice());
+        assertEquals(10, result.getStock());
+        verify(productRepository, times(1)).save(updatedProduct);
     }
 
 }
