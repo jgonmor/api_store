@@ -5,11 +5,11 @@ import com.jgonmor.store.exceptions.ResourceNotFoundException;
 import com.jgonmor.store.model.Client;
 import com.jgonmor.store.repository.IClientRepository;
 import com.jgonmor.store.service.client.ClientService;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -17,6 +17,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 public class ClientServiceTest {
 
     @Mock
@@ -25,10 +26,6 @@ public class ClientServiceTest {
     @InjectMocks
     private ClientService clientService;
 
-    @BeforeEach
-    public void setUp() {
-        MockitoAnnotations.initMocks(this);
-    }
 
     @Test
     void testGetAllClients() {
@@ -94,7 +91,7 @@ public class ClientServiceTest {
         // Arrange
         Long id = 1L;
         Client client = new Client(1L, "client 1", "Last 1", "12345678A");
-        when(clientRepository.existsById(id)).thenReturn(true);
+        when(clientRepository.existsById(client.getId())).thenReturn(true);
 
         // Act
         Boolean result = clientService.deleteClient(id);
@@ -108,7 +105,7 @@ public class ClientServiceTest {
     @Test
     void testDeleteClientNotFound() {
         // Arrange
-        when(clientRepository.findById(1L)).thenReturn(Optional.empty());
+        when(clientRepository.existsById(1L)).thenReturn(false);
 
         // Act
 
