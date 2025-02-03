@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
@@ -37,7 +38,7 @@ public class ProductControllerIntegrationTest {
 
     @Test
     public void testGetAllProductsStatus200() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/products/")
+        mockMvc.perform(MockMvcRequestBuilders.get("/products")
                                               .contentType("application/json"))
                .andExpect(MockMvcResultMatchers.status()
                                                .isOk())
@@ -54,7 +55,7 @@ public class ProductControllerIntegrationTest {
         Mockito.when(productService.getAllProducts()).thenReturn(Arrays.asList(product1, product2));
 
         // Act & Assert
-        mockMvc.perform(MockMvcRequestBuilders.get("/products/")
+        mockMvc.perform(MockMvcRequestBuilders.get("/products")
                                 .contentType(MediaType.APPLICATION_JSON))
                .andExpect(status().isOk())
                .andExpect(content().contentType(MediaType.APPLICATION_JSON))

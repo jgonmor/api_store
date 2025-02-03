@@ -11,7 +11,7 @@ import com.jgonmor.store.model.Product;
 import com.jgonmor.store.model.Sell;
 import com.jgonmor.store.model.SellDetail;
 import com.jgonmor.store.repository.ISellRepository;
-import com.jgonmor.store.service.product.ProductService;
+import com.jgonmor.store.service.product.IProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -27,7 +27,7 @@ public class SellService implements ISellService {
     ISellRepository sellRepository;
 
     @Autowired
-    private ProductService productService;
+    private IProductService productService;
 
 
     @Override

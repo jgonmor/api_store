@@ -6,11 +6,13 @@ import com.jgonmor.store.exceptions.ResourceNotFoundException;
 import com.jgonmor.store.model.Product;
 import com.jgonmor.store.repository.IProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@Primary
 public class ProductService implements IProductService {
     @Autowired
     private IProductRepository productRepository;
