@@ -66,8 +66,8 @@ public class ProductService implements IProductService {
     }
 
     @Override
-    public void saveProducts(List<Product> productList) {
-        productRepository.saveAll(productList);
+    public List<Product> saveProducts(List<Product> productList) {
+        return productRepository.saveAll(productList);
     }
 
 

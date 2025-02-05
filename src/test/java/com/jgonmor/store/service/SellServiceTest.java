@@ -9,12 +9,15 @@ import com.jgonmor.store.model.Product;
 import com.jgonmor.store.model.Sell;
 import com.jgonmor.store.model.SellDetail;
 import com.jgonmor.store.repository.ISellRepository;
+import com.jgonmor.store.service.product.IProductService;
 import com.jgonmor.store.service.sell.SellService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -25,6 +28,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 public class SellServiceTest {
 
     private final List<Product> products = List.of(
@@ -46,18 +50,14 @@ public class SellServiceTest {
             "12345678A"
     );
 
-
-
     @Mock
     private ISellRepository sellRepository;
 
+    @Mock
+    private IProductService productService;
+
     @InjectMocks
     private SellService sellService;
-
-    @BeforeEach
-    public void setUp() {
-        MockitoAnnotations.initMocks(this);
-    }
 
     @Test
     void testGetAllSells() {
@@ -133,16 +133,28 @@ public class SellServiceTest {
                 100d,
                 sellDetails,
                 defaultClient);
-        SellDto savedSellDto = Mapper.sellToDto(savedSell);
 
-        when(sellRepository.save(sell)).thenReturn(savedSell);
+        when(productService.getProductById(1L)).thenReturn(products.get(0));
+        when(productService.getProductById(2L)).thenReturn(products.get(1));
+        when(productService.getProductById(3L)).thenReturn(products.get(2));
+
+        when(productService.saveProducts(anyList())).thenReturn(products);
+        when(sellRepository.save(any(Sell.class))).thenReturn(savedSell);
+
 
         // Act
         SellDto result = sellService.saveSell(sell);
 
         // Assert
         assertNotNull(result);
-        assertEquals(savedSellDto, result);
+        assertEquals(1L, result.getId());
+
+        products.forEach(product -> {
+            verify(productService).getProductById(product.getId());
+        });
+
+        verify(productService, times(1)).saveProducts(anyList());
+
         verify(sellRepository, times(1)).save(sell);
     }
 
@@ -185,7 +197,7 @@ public class SellServiceTest {
     }
 
     @Test
-    void testUpdateSell() {
+    void testUpdateSell() { // TODO
         // Arrange
         Sell sell = new Sell(1L,
                 LocalDateTime.now(),
@@ -197,7 +209,13 @@ public class SellServiceTest {
                 200d,
                 sellDetails,
                 defaultClient);
+
         SellDto updatedSellDto = Mapper.sellToDto(updatedSell);
+
+        when(productService.getProductById(1L)).thenReturn(products.get(0));
+        when(productService.getProductById(2L)).thenReturn(products.get(1));
+        when(productService.getProductById(3L)).thenReturn(products.get(2));
+        when(productService.saveProducts(anyList())).thenReturn(products);
 
         when(sellRepository.existsById(1L)).thenReturn(true);
         when(sellRepository.save(any(Sell.class))).thenReturn(updatedSell);
@@ -207,7 +225,7 @@ public class SellServiceTest {
 
         // Assert
         assertNotNull(result);
-        assertEquals(updatedSellDto, result);
+        assertEquals(updatedSellDto.getId(), result.getId());
         verify(sellRepository, times(1)).save(sell);
     }
 

@@ -13,6 +13,9 @@ spring.jpa.properties.hibernate.dialect=org.hibernate.dialect.MySQLDialect
 spring.jpa.properties.hibernate.format_sql=true
 hibernate.transaction.jta.platform=enabled
 
+spring.jackson.date-format=yyyy-MM-dd HH:mm:ss.SS
+
+
 # Logging settings
 logging.level.org.hibernate.SQL=DEBUG
 logging.level.org.hibernate.type.descriptor.sql.BasicBinder=TRACE

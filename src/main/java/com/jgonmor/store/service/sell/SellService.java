@@ -65,7 +65,7 @@ public class SellService implements ISellService {
     @Override
     public SellDto saveSell(Sell sell) {
 
-        SellDto sellDto;
+        Sell result;
 
         if (sell.getSellDetails()
                 .isEmpty()) {
@@ -95,8 +95,11 @@ public class SellService implements ISellService {
 
         sell.setTotal(total);
 
-        sellDto = Mapper.sellToDto(sell);
-        return sellDto;
+
+        result = sellRepository.save(sell);
+
+
+        return Mapper.sellToDto(result);
     }
 
     @Override
