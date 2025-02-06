@@ -45,13 +45,14 @@ public class SellController {
     public ResponseEntity<?> saveSell(@RequestBody Object request) {
 
         SellDto response;
+        List<SellDto> responseList;
 
         if (request instanceof List) {
             List<Sell> sells = objectMapper.convertValue(request,
-                                                         new TypeReference<List<Sell>>() {}
+                                                         new TypeReference<>() {}
             );
-            sellService.saveSells(sells);
-            return ResponseEntity.ok("Sells saved");
+            responseList = sellService.saveSells(sells);
+            return ResponseEntity.ok(responseList);
         } else if (request instanceof java.util.Map) {
             Sell sell = objectMapper.convertValue(request, Sell.class);
             response = sellService.saveSell(sell);
@@ -67,6 +68,13 @@ public class SellController {
     public ResponseEntity<?> updateSell(@RequestBody Sell sell) {
         SellDto updatedSell = sellService.updateSell(sell);
         return ResponseEntity.ok(updatedSell);
+    }
+
+    @PatchMapping("update/remove-product/{sellId}/{productId}")
+    public ResponseEntity<?> removeProductFromSell(@PathVariable Long sellId,
+                                                   @PathVariable Long productId) {
+        SellDto sell = sellService.removeProductFromSell(sellId, productId);
+        return ResponseEntity.ok(sell);
     }
 
     @DeleteMapping("/delete/{id}")

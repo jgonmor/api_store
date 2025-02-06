@@ -10,6 +10,7 @@ import com.jgonmor.store.mapper.Mapper;
 import com.jgonmor.store.model.Product;
 import com.jgonmor.store.model.Sell;
 import com.jgonmor.store.model.SellDetail;
+import com.jgonmor.store.repository.ISellDetailRepository;
 import com.jgonmor.store.repository.ISellRepository;
 import com.jgonmor.store.service.product.IProductService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 @Service
@@ -25,6 +27,9 @@ public class SellService implements ISellService {
 
     @Autowired
     ISellRepository sellRepository;
+
+    @Autowired
+    ISellDetailRepository sellDetailRepository;
 
     @Autowired
     private IProductService productService;
@@ -76,10 +81,11 @@ public class SellService implements ISellService {
 
         sell.getSellDetails()
             .forEach(sellDetail -> {
-                if (sellDetail.getUnitPrice() == 0 && sellDetail.getProduct().getPrice() != null) {
-                    sellDetail.setUnitPrice(sellDetail.getProduct().getPrice());
-                }
-                else if(sellDetail.getUnitPrice() == 0) {
+                if (sellDetail.getUnitPrice() == 0 && sellDetail.getProduct()
+                                                                .getPrice() != null) {
+                    sellDetail.setUnitPrice(sellDetail.getProduct()
+                                                      .getPrice());
+                } else if (sellDetail.getUnitPrice() == 0) {
                     throw new RequiredParamNotFoundException("Product or unit price must be provided");
                 }
                 sellDetail.setTotal(sellDetail.getQuantity() * sellDetail.getUnitPrice());
@@ -95,9 +101,7 @@ public class SellService implements ISellService {
 
         sell.setTotal(total);
 
-
         result = sellRepository.save(sell);
-
 
         return Mapper.sellToDto(result);
     }
@@ -105,8 +109,40 @@ public class SellService implements ISellService {
     @Override
     public SellDto updateSell(Sell sell) {
         this.existOrException(sell.getId());
+        Sell result;
 
-        return this.saveSell(sell);
+        if (sell.getSellDetails()
+                .isEmpty()) {
+            throw new RequiredParamNotFoundException("Sell must have products");
+        }
+
+        this.fixStockWhenUpdate(sell);
+
+        sell.getSellDetails()
+            .forEach(sellDetail -> {
+                if (sellDetail.getUnitPrice() == 0 && sellDetail.getProduct()
+                                                                .getPrice() != null) {
+                    sellDetail.setUnitPrice(sellDetail.getProduct()
+                                                      .getPrice());
+                } else if (sellDetail.getUnitPrice() == 0) {
+                    throw new RequiredParamNotFoundException("Product or unit price must be provided");
+                }
+                sellDetail.setTotal(sellDetail.getQuantity() * sellDetail.getUnitPrice());
+
+                sellDetail.setSell(sell);
+            });
+
+
+        double total = sell.getSellDetails()
+                           .stream()
+                           .mapToDouble(SellDetail::getTotal)
+                           .sum();
+
+        sell.setTotal(total);
+
+        result = sellRepository.save(sell);
+
+        return Mapper.sellToDto(result);
     }
 
     @Override
@@ -143,11 +179,55 @@ public class SellService implements ISellService {
 
         sells.forEach(this::fixStock);
 
+        sells.forEach(sell -> {
+            double total = sell.getSellDetails()
+                               .stream()
+                               .mapToDouble(SellDetail::getTotal)
+                               .sum();
+
+            sell.setTotal(total);
+        });
+
+
         sellRepository.saveAll(sells);
 
         sellDtos = Mapper.sellsToDtoList(sells);
 
         return sellDtos;
+    }
+
+    @Override
+    public SellDto removeProductFromSell(Long sellId,
+                                         Long productId) {
+
+        Sell sell = sellRepository.findById(sellId)
+                                  .orElseThrow(() -> new ResourceNotFoundException("Sell not found"));
+
+        Product product = productService.getProductById(productId);
+
+        if (product == null) {
+            throw new ResourceNotFoundException("Product not found");
+        }
+
+       SellDetail detailsToRemove = sellDetailRepository.findBySellAndProduct(sell, product)
+                                                        .orElseThrow(() -> new ResourceNotFoundException("Product not found on sell"));
+
+        sellDetailRepository.delete(detailsToRemove);
+
+        product.setStock(product.getStock() + detailsToRemove.getQuantity());
+
+        productService.saveProduct(product);
+
+        double total = sell.getSellDetails()
+                           .stream()
+                           .mapToDouble(SellDetail::getTotal)
+                           .sum();
+
+        sell.setTotal(total);
+
+        sellRepository.save(sell);
+
+        return Mapper.sellToDto(sell);
     }
 
 
@@ -158,7 +238,7 @@ public class SellService implements ISellService {
         }
     }
 
-    private void fixStock(Sell sell){
+    private void fixStock(Sell sell) {
 
         List<Product> productList = new ArrayList<>();
 
@@ -167,7 +247,7 @@ public class SellService implements ISellService {
 
                 Product product = productService.getProductById(sellDetail.getProduct()
                                                                           .getId());
-                if(product.getStock() < sellDetail.getQuantity() ){
+                if (product.getStock() < sellDetail.getQuantity()) {
                     throw new NotEnoughStockException("Not enough stock for product " + product.getName()
                                                               + " (id " + product.getId() + ")");
                 }
@@ -180,5 +260,39 @@ public class SellService implements ISellService {
 
     }
 
+    private void fixStockWhenUpdate(Sell sell) {
+
+        List<Product> productList = new ArrayList<>();
+
+        HashMap<Long, SellDetail> oldDetails = new HashMap<>();
+        sell.getSellDetails()
+            .forEach(sellDetail ->
+                sellDetailRepository.findBySellAndProduct(sell, sellDetail.getProduct())
+                                    .ifPresent(oldDetail -> oldDetails.put(sellDetail.getProduct().getId(), oldDetail))
+            );
+
+        sell.getSellDetails()
+            .forEach(sellDetail -> {
+                SellDetail oldDetail = oldDetails.get(sellDetail.getProduct().getId());
+
+                int quantity = sellDetail.getQuantity() - oldDetail.getQuantity() ;
+
+                Product product = productService.getProductById(sellDetail.getProduct()
+                                                                          .getId());
+                if (product.getStock() < quantity) {
+                    throw new NotEnoughStockException("Not enough stock for product " + product.getName()
+                                                              + " (id " + product.getId() + ")");
+                }
+
+                product.setStock(product.getStock() - quantity);
+                productList.add(product);
+                sellDetail.setId(oldDetail.getId());
+
+                sellDetailRepository.save(sellDetail);
+            });
+
+        productService.saveProducts(productList);
+
+    }
 
 }

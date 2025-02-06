@@ -3,6 +3,7 @@ package com.jgonmor.store.mapper;
 import com.jgonmor.store.dto.ClientDto;
 import com.jgonmor.store.dto.SellDetailDto;
 import com.jgonmor.store.dto.SellDto;
+import com.jgonmor.store.model.Client;
 import com.jgonmor.store.model.Sell;
 import com.jgonmor.store.model.SellDetail;
 
@@ -37,5 +38,12 @@ public class Mapper {
                            sell.getTotal(),
                            ClientDto.fromEntity(sell.getClient()),
                            Mapper.sellDetailtoDtoList(sell.getSellDetails()));
+    }
+
+    static public ClientDto ClientToDto(Client client){
+        return new ClientDto(client.getId(),
+                             client.getName(),
+                             client.getLastName(),
+                             client.getCitizenId());
     }
 }

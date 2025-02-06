@@ -27,4 +27,7 @@ public interface ISellService {
     SellClientNameDto getSellWithClientName();
 
     List<SellDto> saveSells(List<Sell> sells);
+
+    SellDto removeProductFromSell(Long sellId,
+                                  Long productId);
 }

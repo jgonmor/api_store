@@ -8,15 +8,14 @@ import com.jgonmor.store.model.Client;
 import com.jgonmor.store.model.Product;
 import com.jgonmor.store.model.Sell;
 import com.jgonmor.store.model.SellDetail;
+import com.jgonmor.store.repository.ISellDetailRepository;
 import com.jgonmor.store.repository.ISellRepository;
 import com.jgonmor.store.service.product.IProductService;
 import com.jgonmor.store.service.sell.SellService;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
@@ -55,6 +54,9 @@ public class SellServiceTest {
 
     @Mock
     private IProductService productService;
+
+    @Mock
+    private ISellDetailRepository sellDetailRepository;
 
     @InjectMocks
     private SellService sellService;
@@ -149,9 +151,7 @@ public class SellServiceTest {
         assertNotNull(result);
         assertEquals(1L, result.getId());
 
-        products.forEach(product -> {
-            verify(productService).getProductById(product.getId());
-        });
+        products.forEach(product -> verify(productService).getProductById(product.getId()));
 
         verify(productService, times(1)).saveProducts(anyList());
 
@@ -162,11 +162,6 @@ public class SellServiceTest {
     void testDeleteSell() {
         // Arrange
         Long id = 1L;
-        Sell sell = new Sell(1L,
-                LocalDateTime.now(),
-                100d,
-                sellDetails,
-                defaultClient);
         when(sellRepository.existsById(id)).thenReturn(true);
 
         // Act
@@ -197,8 +192,9 @@ public class SellServiceTest {
     }
 
     @Test
-    void testUpdateSell() { // TODO
+    void testUpdateSell() {
         // Arrange
+
         Sell sell = new Sell(1L,
                 LocalDateTime.now(),
                 100d,
@@ -212,9 +208,10 @@ public class SellServiceTest {
 
         SellDto updatedSellDto = Mapper.sellToDto(updatedSell);
 
-        when(productService.getProductById(1L)).thenReturn(products.get(0));
-        when(productService.getProductById(2L)).thenReturn(products.get(1));
-        when(productService.getProductById(3L)).thenReturn(products.get(2));
+        for ( int i = 0; i < sellDetails.size(); i++) {
+            when(sellDetailRepository.findBySellAndProduct(sell, sellDetails.get(i).getProduct())).thenReturn(Optional.of(sellDetails.get(i)));
+            when(productService.getProductById(1L + i)).thenReturn(products.get(i));
+        }
         when(productService.saveProducts(anyList())).thenReturn(products);
 
         when(sellRepository.existsById(1L)).thenReturn(true);
@@ -232,11 +229,6 @@ public class SellServiceTest {
     @Test
     void testGetProductsBySellId() {
         // Arrange
-        Sell sell = new Sell(1L,
-                             LocalDateTime.now(),
-                             100d,
-                             sellDetails,
-                             defaultClient);
         when(sellRepository.existsById(1L)).thenReturn(true);
         when(sellRepository.findProductsBySellId(1L)).thenReturn(products);
 
@@ -289,4 +281,59 @@ public class SellServiceTest {
         assertEquals("Gonzalez", result.getLastName());
         verify(sellRepository, times(1)).findBiggestSell();
     }
+
+    @Test
+    void testRemoveProductFromSell() {
+        // Arrange
+        Sell sell = new Sell(1L,
+                             LocalDateTime.now(),
+                             100d,
+                             sellDetails,
+                             defaultClient);
+        when(sellRepository.findById(1L)).thenReturn(Optional.of(sell));
+        when(productService.getProductById(1L)).thenReturn(products.get(0));
+        when(sellDetailRepository.findBySellAndProduct(sell, products.get(0))).thenReturn(Optional.of(sellDetails.get(0)));
+
+        // Act
+        SellDto result = sellService.removeProductFromSell(1L, 1L);
+
+        // Assert
+        assertNotNull(result);
+        assertEquals(1L, result.getId());
+        verify(sellRepository, times(1)).findById(1L);
+        verify(sellRepository, times(1)).save(sell);
+        verify(productService, times(1)).getProductById(1L);
+        verify(productService, times(1)).saveProduct(products.get(0));
+    }
+
+    @Test
+    void testRemoveProductFromSellNotFound() {
+        // Arrange
+        // Arrange
+        Sell sell = new Sell(1L,
+                             LocalDateTime.now(),
+                             100d,
+                             sellDetails,
+                             defaultClient);
+        when(sellRepository.findById(1L)).thenReturn(Optional.of(sell));
+        when(productService.getProductById(2L)).thenReturn(null);
+
+        // Act
+        try {
+            sellService.removeProductFromSell(1L, 2L);
+        } catch (ResourceNotFoundException e) {
+            // Assert
+            assertEquals("Product not found", e.getMessage());
+
+        } finally {
+            verify(sellRepository, times(1)).findById(1L);
+            verify(sellRepository, times(0)).save(sell);
+            verify(productService, times(0)).saveProduct(products.get(1));
+            verify(sellDetailRepository, times(0)).findBySellAndProduct(sell, products.get(1));
+            verify(sellDetailRepository, times(0)).delete(sellDetails.get(1));
+
+        }
+
+    }
+
 }

@@ -1,7 +1,6 @@
 package com.jgonmor.store.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
 import com.jgonmor.store.dto.SellClientNameDto;
 import com.jgonmor.store.dto.SellDto;
 import com.jgonmor.store.mapper.Mapper;
@@ -224,11 +223,6 @@ public class SellControllerIntegrationTest {
     @Test
     void getSellProducts_shouldReturnProducts() throws Exception {
         // Arrange
-        Sell sell = new Sell(1L,
-                             LocalDateTime.now(),
-                             100d,
-                             sellDetails,
-                             defaultClient);
         when(sellService.getProductsFromSell(1L)).thenReturn(products);
 
         // Act & Assert
@@ -245,11 +239,6 @@ public class SellControllerIntegrationTest {
     @Test
     void getTotalFromSellsOnDay_shouldReturnTotal() throws Exception {
         // Arrange
-        Sell sell = new Sell(1L,
-                             LocalDateTime.now(),
-                             100d,
-                             sellDetails,
-                             defaultClient);
         when(sellService.getTotalFromSellsOnDay(LocalDate.parse("2025-01-01"))).thenReturn(100.00);
 
         // Act & Assert
@@ -305,5 +294,25 @@ public class SellControllerIntegrationTest {
                .andExpect(jsonPath("$.name", is("Juan")))
                .andExpect(jsonPath("$.lastName", is("González")));
     }
+
+    @Test
+    void removeProductFromSell_shouldReturnStatus200() throws Exception {
+        // Arrange
+        SellDto sell = new SellDto(1L,
+                                   LocalDateTime.now(),
+                                   100d,
+                                   Mapper.ClientToDto(defaultClient),
+                                   Mapper.sellDetailtoDtoList(sellDetails));
+        when(sellService.removeProductFromSell(1L, 1L)).thenReturn(sell);
+
+        // Act & Assert
+        mockMvc.perform(patch("/sells/update/remove-product/1/1")
+                                .contentType(MediaType.APPLICATION_JSON))
+               .andExpect(status().isOk())
+               .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+               .andExpect(jsonPath("$.id", is(1)))
+               .andExpect(jsonPath("$.total", is(100d)));
+    }
+
 
 }
