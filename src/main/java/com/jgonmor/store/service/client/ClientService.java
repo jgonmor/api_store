@@ -3,6 +3,7 @@ package com.jgonmor.store.service.client;
 import com.jgonmor.store.dto.ClientDto;
 import com.jgonmor.store.exceptions.EmptyTableException;
 import com.jgonmor.store.exceptions.ResourceNotFoundException;
+import com.jgonmor.store.mapper.Mapper;
 import com.jgonmor.store.model.Client;
 import com.jgonmor.store.repository.IClientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,18 @@ public class ClientService implements IClientService{
     @Autowired
     private IClientRepository clientRepository;
 
+    /**
+     * Checks if the client exists.
+     *
+     * @param id The id of the client to be checked.
+     */
+    private void existOrException(Long id){
+        boolean exists = clientRepository.existsById(id);
+        if(!exists){
+            throw new ResourceNotFoundException("Client not found");
+        }
+    }
+
     @Override
     public List<ClientDto> getAllClients() {
         List<Client> clients = clientRepository.findAll();
@@ -23,21 +36,22 @@ public class ClientService implements IClientService{
             throw new EmptyTableException("There are no clients");
         }
 
-        return this.toDtoList(clients);
+        return Mapper.clientsToDtoList(clients);
     }
 
     @Override
     public ClientDto getClientById(Long id) {
         Client client = clientRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Client not found"));
-        return ClientDto.fromEntity(client);
+        return Mapper.clientToDto(client);
     }
 
     @Override
     public ClientDto saveClient(ClientDto clientDto) {
-        Client client = ClientDto.toEntity(clientDto);
+        Client client = Mapper.clientDtoToEntity(clientDto);
         Client savedClient = clientRepository.save(client);
-        return ClientDto.fromEntity(savedClient);
+        return Mapper.clientToDto(savedClient);
     }
+
 
     @Override
     public Boolean deleteClient(Long id) {
@@ -54,20 +68,6 @@ public class ClientService implements IClientService{
         this.existOrException(client.getId());
 
         return this.saveClient(client);
-    }
-
-    private void existOrException(Long id){
-        boolean exists = clientRepository.existsById(id);
-        if(!exists){
-            throw new ResourceNotFoundException("Client not found");
-        }
-    }
-
-
-    public List<ClientDto> toDtoList(List<Client> clients) {
-        return clients.stream()
-                      .map(ClientDto::fromEntity)
-                      .toList();
     }
 
 }

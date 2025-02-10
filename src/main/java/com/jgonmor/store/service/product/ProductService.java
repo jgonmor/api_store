@@ -14,8 +14,21 @@ import java.util.List;
 @Service
 @Primary
 public class ProductService implements IProductService {
+
+
     @Autowired
     private IProductRepository productRepository;
+
+    /**
+     * Checks if the product exists.
+     *
+     * @param id The id of the product to be checked.
+     */
+    public void existOrException(Long id){
+        if(!productRepository.existsById(id)){
+            throw new ResourceNotFoundException("Product not found");
+        }
+    }
 
     @Override
     public List<Product> getAllProducts() {
@@ -70,10 +83,4 @@ public class ProductService implements IProductService {
         return productRepository.saveAll(productList);
     }
 
-
-    public void existOrException(Long id){
-        if(!productRepository.existsById(id)){
-            throw new ResourceNotFoundException("Product not found");
-        }
-    }
 }

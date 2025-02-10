@@ -34,6 +34,85 @@ public class SellService implements ISellService {
     @Autowired
     private IProductService productService;
 
+    /**
+     * Checks if the sell exists.
+     *
+     * @param id The id of the sell to be checked.
+     */
+    public void existOrException(Long id) {
+        boolean exists = sellRepository.existsById(id);
+        if (!exists) {
+            throw new ResourceNotFoundException("Sell not found");
+        }
+    }
+
+    /**
+     * Fixes the stock of the sell.
+     *
+     * @param sell The sell to be fixed.
+     */
+    private void fixStock(Sell sell) {
+
+        List<Product> productList = new ArrayList<>();
+
+        sell.getSellDetails()
+            .forEach(sellDetail -> {
+
+                Product product = productService.getProductById(sellDetail.getProduct()
+                                                                          .getId());
+                if (product.getStock() < sellDetail.getQuantity()) {
+                    throw new NotEnoughStockException("Not enough stock for product " + product.getName()
+                                                              + " (id " + product.getId() + ")");
+                }
+
+                product.setStock(product.getStock() - sellDetail.getQuantity());
+                productList.add(product);
+            });
+
+        productService.saveProducts(productList);
+
+    }
+
+    /**
+     * Fixes the stock of the sell when it is updated.
+     *
+     * @param sell The sell to be fixed.
+     */
+    private void fixStockWhenUpdate(Sell sell) {
+
+        List<Product> productList = new ArrayList<>();
+
+        HashMap<Long, SellDetail> oldDetails = new HashMap<>();
+        sell.getSellDetails()
+            .forEach(sellDetail ->
+                             sellDetailRepository.findBySellAndProduct(sell, sellDetail.getProduct())
+                                                 .ifPresent(oldDetail -> oldDetails.put(sellDetail.getProduct().getId(), oldDetail))
+            );
+
+        sell.getSellDetails()
+            .forEach(sellDetail -> {
+                SellDetail oldDetail = oldDetails.get(sellDetail.getProduct().getId());
+
+                int quantity = sellDetail.getQuantity() - oldDetail.getQuantity() ;
+
+                Product product = productService.getProductById(sellDetail.getProduct()
+                                                                          .getId());
+                if (product.getStock() < quantity) {
+                    throw new NotEnoughStockException("Not enough stock for product " + product.getName()
+                                                              + " (id " + product.getId() + ")");
+                }
+
+                product.setStock(product.getStock() - quantity);
+                productList.add(product);
+                sellDetail.setId(oldDetail.getId());
+
+                sellDetailRepository.save(sellDetail);
+            });
+
+        productService.saveProducts(productList);
+
+    }
+
 
     @Override
     public List<SellDto> getAllSells() {
@@ -160,16 +239,16 @@ public class SellService implements ISellService {
                                         59,
                                         999999999);
 
-        return sellRepository.getTotalFromSellsOnDay(start,
+        return sellRepository.getTotalFromSellsInAPeriod(start,
                                                      end);
     }
 
     @Override
-    public SellClientNameDto getSellWithClientName() {
+    public SellClientNameDto getBiggestSellWithClientName() {
 
         Sell sell = sellRepository.findBiggestSell();
 
-        return SellClientNameDto.fromEntity(sell);
+        return Mapper.sellToClientNameDto(sell);
     }
 
     @Override
@@ -230,69 +309,5 @@ public class SellService implements ISellService {
         return Mapper.sellToDto(sell);
     }
 
-
-    public void existOrException(Long id) {
-        boolean exists = sellRepository.existsById(id);
-        if (!exists) {
-            throw new ResourceNotFoundException("Sell not found");
-        }
-    }
-
-    private void fixStock(Sell sell) {
-
-        List<Product> productList = new ArrayList<>();
-
-        sell.getSellDetails()
-            .forEach(sellDetail -> {
-
-                Product product = productService.getProductById(sellDetail.getProduct()
-                                                                          .getId());
-                if (product.getStock() < sellDetail.getQuantity()) {
-                    throw new NotEnoughStockException("Not enough stock for product " + product.getName()
-                                                              + " (id " + product.getId() + ")");
-                }
-
-                product.setStock(product.getStock() - sellDetail.getQuantity());
-                productList.add(product);
-            });
-
-        productService.saveProducts(productList);
-
-    }
-
-    private void fixStockWhenUpdate(Sell sell) {
-
-        List<Product> productList = new ArrayList<>();
-
-        HashMap<Long, SellDetail> oldDetails = new HashMap<>();
-        sell.getSellDetails()
-            .forEach(sellDetail ->
-                sellDetailRepository.findBySellAndProduct(sell, sellDetail.getProduct())
-                                    .ifPresent(oldDetail -> oldDetails.put(sellDetail.getProduct().getId(), oldDetail))
-            );
-
-        sell.getSellDetails()
-            .forEach(sellDetail -> {
-                SellDetail oldDetail = oldDetails.get(sellDetail.getProduct().getId());
-
-                int quantity = sellDetail.getQuantity() - oldDetail.getQuantity() ;
-
-                Product product = productService.getProductById(sellDetail.getProduct()
-                                                                          .getId());
-                if (product.getStock() < quantity) {
-                    throw new NotEnoughStockException("Not enough stock for product " + product.getName()
-                                                              + " (id " + product.getId() + ")");
-                }
-
-                product.setStock(product.getStock() - quantity);
-                productList.add(product);
-                sellDetail.setId(oldDetail.getId());
-
-                sellDetailRepository.save(sellDetail);
-            });
-
-        productService.saveProducts(productList);
-
-    }
 
 }

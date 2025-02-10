@@ -13,7 +13,6 @@ import java.util.Optional;
 @Repository
 public interface ISellDetailRepository extends JpaRepository<SellDetail, Long> {
 
-
     /**
      * Finds sellDetails by sell and product.
      *

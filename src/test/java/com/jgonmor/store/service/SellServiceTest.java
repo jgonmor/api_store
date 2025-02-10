@@ -248,14 +248,14 @@ public class SellServiceTest {
         LocalDateTime start = date.atStartOfDay();
         LocalDateTime end = date.atTime(23, 59, 59, 999999999);
 
-        when(sellRepository.getTotalFromSellsOnDay(start, end)).thenReturn(100.00);
+        when(sellRepository.getTotalFromSellsInAPeriod(start, end)).thenReturn(100.00);
 
         // Act
         Double result = sellService.getTotalFromSellsOnDay(date);
 
         // Assert
         assertNotNull(result);
-        verify(sellRepository, times(1)).getTotalFromSellsOnDay(start, end);
+        verify(sellRepository, times(1)).getTotalFromSellsInAPeriod(start, end);
         assertEquals(100.00, result);  // Assert the expected value
 
     }
@@ -271,7 +271,7 @@ public class SellServiceTest {
         when(sellRepository.findBiggestSell()).thenReturn(sell);
 
         // Act
-        SellClientNameDto result = sellService.getSellWithClientName();
+        SellClientNameDto result = sellService.getBiggestSellWithClientName();
 
         // Assert
         assertNotNull(result);

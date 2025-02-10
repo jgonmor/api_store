@@ -9,6 +9,12 @@ import java.util.List;
 
 @Repository
 public interface IProductRepository extends JpaRepository<Product, Long> {
+
+    /**
+     * Finds Products where stock is lower than 5.
+     *
+     * @return List of Products with low stock.
+     */
     @Query("select p from Product p where p.stock < 5")
     List<Product> findLowStockProducts();
 }

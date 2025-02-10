@@ -11,12 +11,30 @@ import java.util.List;
 
 @Repository
 public interface ISellRepository extends JpaRepository<Sell, Long> {
+    /**
+     * Finds all the products from a sell.
+     *
+     * @param sellId The sell.
+     * @return A list of products.
+     */
     @Query("select s.product from SellDetail s where s.sell.id = :sellId")
     List<Product> findProductsBySellId(Long sellId);
 
+    /**
+     * Gets the total of earnings in a period.
+     *
+     * @param start The beginning of the period.
+     * @param end The end of the period.
+     * @return The total of earnings in that period.
+     */
     @Query("select sum(s.total) from Sell s where s.date >= :start and s.date <= :end")
-    Double getTotalFromSellsOnDay(LocalDateTime start, LocalDateTime end);
+    Double getTotalFromSellsInAPeriod(LocalDateTime start, LocalDateTime end);
 
+    /**
+     * Gets the biggest sell.
+     *
+     * @return The biggest Sell.
+     */
     @Query("select s from Sell s order by s.total desc limit 1")
     Sell findBiggestSell();
 }

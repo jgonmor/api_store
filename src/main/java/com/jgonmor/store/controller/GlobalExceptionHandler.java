@@ -11,6 +11,11 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
+    /**
+     * Handles when a table is empty.
+     *
+     * @return http status 404.
+     */
     @ExceptionHandler(EmptyTableException.class)
     public ResponseEntity<ErrorResponse> handleEmptyTableException(EmptyTableException ex) {
        return ResponseEntity.status(404)
@@ -19,6 +24,11 @@ public class GlobalExceptionHandler {
                                                  ex.getMessage()));
     }
 
+    /**
+     * Handles when a query response is empty.
+     *
+     * @return http status 404.
+     */
     @ExceptionHandler(EmptyQueryException.class)
     public ResponseEntity<ErrorResponse> handleEmptyQueryException(EmptyQueryException ex) {
         return ResponseEntity.status(404)
@@ -27,6 +37,11 @@ public class GlobalExceptionHandler {
                                                         ex.getMessage()));
     }
 
+    /**
+     * Handles when entry is not found.
+     *
+     * @return http status 404.
+     */
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleResourceNotFoundException(ResourceNotFoundException ex) {
         return ResponseEntity.status(404)
@@ -35,6 +50,11 @@ public class GlobalExceptionHandler {
                                                         ex.getMessage()));
     }
 
+    /**
+     * Handles when a required param is missing.
+     *
+     * @return http status 400.
+     */
     @ExceptionHandler(RequiredParamNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleRequiredParamNotFoundException(RequiredParamNotFoundException ex) {
         return ResponseEntity.status(400)
@@ -43,6 +63,11 @@ public class GlobalExceptionHandler {
                                                         ex.getMessage()));
     }
 
+    /**
+     * Handles when a product has not enough stock.
+     *
+     * @return http status 404.
+     */
     @ExceptionHandler(NotEnoughStockException.class)
     public ResponseEntity<ErrorResponse> handleNotEnoughStockException(NotEnoughStockException ex) {
         return ResponseEntity.status(404)

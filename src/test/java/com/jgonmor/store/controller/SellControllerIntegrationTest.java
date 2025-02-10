@@ -254,7 +254,7 @@ public class SellControllerIntegrationTest {
 
         // Arrange
         SellClientNameDto sell = new SellClientNameDto(1L, 100.00, sellDetails, "Juan", "González" );
-        when(sellService.getSellWithClientName()).thenReturn(sell);
+        when(sellService.getBiggestSellWithClientName()).thenReturn(sell);
 
         // Act & Assert
         mockMvc.perform(MockMvcRequestBuilders.get("/sells/biggest-sell")
@@ -301,7 +301,7 @@ public class SellControllerIntegrationTest {
         SellDto sell = new SellDto(1L,
                                    LocalDateTime.now(),
                                    100d,
-                                   Mapper.ClientToDto(defaultClient),
+                                   Mapper.clientToDto(defaultClient),
                                    Mapper.sellDetailtoDtoList(sellDetails));
         when(sellService.removeProductFromSell(1L, 1L)).thenReturn(sell);
 
