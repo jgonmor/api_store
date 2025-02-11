@@ -2,6 +2,7 @@ package com.jgonmor.store.service;
 
 import com.jgonmor.store.dto.ClientDto;
 import com.jgonmor.store.exceptions.ResourceNotFoundException;
+import com.jgonmor.store.mapper.Mapper;
 import com.jgonmor.store.model.Client;
 import com.jgonmor.store.repository.IClientRepository;
 import com.jgonmor.store.service.client.ClientService;
@@ -73,7 +74,7 @@ public class ClientServiceTest {
         // Arrange
         Client client = new Client(null, "client 1", "Last 1", "12345678A");
         Client savedClient = new Client(1L, "client 1", "Last 1", "12345678A");
-        ClientDto clientDto = ClientDto.fromEntity(client);
+        ClientDto clientDto = Mapper.clientToDto(client);
 
         when(clientRepository.save(client)).thenReturn(savedClient);
 
