@@ -10,6 +10,13 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
+/**
+ * SellDetail Repository Class
+ * Manages sellsDetails in the database.
+ *
+ * @author Juanma G. Morcillo
+ * @version 1.0
+ */
 @Repository
 public interface ISellDetailRepository extends JpaRepository<SellDetail, Long> {
 

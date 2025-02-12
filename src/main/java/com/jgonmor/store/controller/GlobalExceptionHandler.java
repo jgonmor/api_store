@@ -8,6 +8,12 @@ import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
+/**
+ * Exception Controller to manage exceptions.
+ *
+ * @author Juanma G. Morcillo
+ * @version 1.0
+ */
 @ControllerAdvice
 public class GlobalExceptionHandler {
 

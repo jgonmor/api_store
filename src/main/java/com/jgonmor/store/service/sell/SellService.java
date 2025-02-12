@@ -22,6 +22,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+/**
+ * Sell Service Class
+ * implements methods to manage sells.
+ *
+ * @author Juanma G. Morcillo
+ * @version 1.0
+ */
 @Service
 public class SellService implements ISellService {
 

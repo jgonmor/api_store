@@ -9,6 +9,13 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * Sell Repository Class
+ * Manages sells in the database.
+ *
+ * @author Juanma G. Morcillo
+ * @version 1.0
+ */
 @Repository
 public interface ISellRepository extends JpaRepository<Sell, Long> {
     /**

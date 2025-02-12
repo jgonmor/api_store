@@ -8,6 +8,12 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * Client Controller to manage Clients.
+ *
+ * @author Juanma G. Morcillo
+ * @version 1.0
+ */
 @RestController
 @RequestMapping("/clients")
 public class ClientController {

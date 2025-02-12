@@ -5,6 +5,12 @@ import lombok.*;
 
 import java.util.List;
 
+/**
+ * A Sell DTO class with the client name.
+ *
+ * @author Juanma G. Morcillo
+ * @version 1.0
+ */
 @Getter
 @Setter
 @AllArgsConstructor

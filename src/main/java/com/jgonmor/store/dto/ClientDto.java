@@ -2,6 +2,13 @@ package com.jgonmor.store.dto;
 
 import lombok.*;
 
+
+/**
+ * Client DTO Class.
+ *
+ * @author Juanma G. Morcillo
+ * @version 1.0
+ */
 @Getter
 @Setter
 @AllArgsConstructor

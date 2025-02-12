@@ -8,6 +8,13 @@ import com.jgonmor.store.model.Sell;
 import java.time.LocalDate;
 import java.util.List;
 
+/**
+ * Sell Service Interface
+ * Contains methods to manage sells.
+ *
+ * @author Juanma G. Morcillo
+ * @version 1.0
+ */
 public interface ISellService {
 
     /**

@@ -11,6 +11,13 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
+ * Client Service Class
+ * Implements methods to manage clients.
+ *
+ * @author Juanma G. Morcillo
+ * @version 1.0
+ */
 @Service
 public class ClientService implements IClientService{
 

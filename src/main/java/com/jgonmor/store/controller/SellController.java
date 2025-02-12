@@ -15,6 +15,12 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.List;
 
+/**
+ * Sell Controller to manage Sells.
+ *
+ * @author Juanma G. Morcillo
+ * @version 1.0
+ */
 @RestController
 @RequestMapping("/sells")
 public class SellController {

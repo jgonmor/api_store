@@ -11,6 +11,13 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
+ * Product Service Interface
+ * Contains methods to manage products.
+ *
+ * @author Juanma G. Morcillo
+ * @version 1.0
+ */
 @Service
 @Primary
 public class ProductService implements IProductService {

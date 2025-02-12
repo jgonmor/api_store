@@ -4,6 +4,13 @@ import com.jgonmor.store.model.Product;
 
 import java.util.List;
 
+/**
+ * Product Service Interface
+ * Contains methods to manage products.
+ *
+ * @author Juanma G. Morcillo
+ * @version 1.0
+ */
 public interface IProductService {
 
     /**

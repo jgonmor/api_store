@@ -6,6 +6,12 @@ import lombok.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * Sell DTO Class.
+ *
+ * @author Juanma G. Morcillo
+ * @version 1.0
+ */
 @Getter
 @Setter
 @AllArgsConstructor

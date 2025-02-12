@@ -4,6 +4,13 @@ import com.jgonmor.store.dto.ClientDto;
 
 import java.util.List;
 
+/**
+ * Client Service Interface
+ * Contains methods to manage clients.
+ *
+ * @author Juanma G. Morcillo
+ * @version 1.0
+ */
 public interface IClientService {
 
     /**

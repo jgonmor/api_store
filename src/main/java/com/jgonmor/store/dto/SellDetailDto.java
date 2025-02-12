@@ -7,6 +7,12 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/**
+ * Sell Detail DTO Class.
+ *
+ * @author Juanma G. Morcillo
+ * @version 1.0
+ */
 @Getter
 @Setter
 @NoArgsConstructor

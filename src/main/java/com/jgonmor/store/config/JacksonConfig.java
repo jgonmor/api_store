@@ -11,6 +11,15 @@ import org.springframework.context.annotation.Primary;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+/**
+ * Jackson Configuration Class
+ * Configures the ObjectMapper for date Formatting.
+ * Pattern: yyyy-MM-dd'T'HH:mm:ss.SSS
+ *
+ * @author Juanma G. Morcillo
+ * @version 1.0
+ */
+
 @Configuration
 public class JacksonConfig {
     @Bean

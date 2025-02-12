@@ -7,6 +7,13 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+/**
+ * Product Repository Class
+ * Manages products in the database.
+ *
+ * @author Juanma G. Morcillo
+ * @version 1.0
+ */
 @Repository
 public interface IProductRepository extends JpaRepository<Product, Long> {
 

@@ -8,6 +8,12 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * Product Controller to manage Products.
+ *
+ * @author Juanma G. Morcillo
+ * @version 1.0
+ */
 @RestController
 @RequestMapping("/products")
 public class ProductController {

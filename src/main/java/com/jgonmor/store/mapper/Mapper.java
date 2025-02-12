@@ -10,6 +10,13 @@ import com.jgonmor.store.model.SellDetail;
 
 import java.util.List;
 
+/**
+ * Mapper Class
+ * Maps objects to DTOs and vice versa.
+ *
+ * @author Juanma G. Morcillo
+ * @version 1.0
+ */
 public class Mapper {
 
     /**
