@@ -1,0 +1,9 @@
+com.jgonmor.store.config
+com.jgonmor.store.dto
+com.jgonmor.store.exceptions
+com.jgonmor.store.mapper
+com.jgonmor.store.model
+com.jgonmor.store.repository
+com.jgonmor.store.service.client
+com.jgonmor.store.service.product
+com.jgonmor.store.service.sell
